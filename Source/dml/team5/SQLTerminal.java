@@ -121,6 +121,7 @@ class stripper{
 						if (!Character.isLowerCase(input.charAt(i+2))){
 							changesArray[changesIndex][0] = "rename";
 							changesArray[changesIndex][1] = previous;
+							output = output + "as";
 							i++;
 							asMarker = true;
 						}else{
@@ -170,6 +171,7 @@ class stripper{
 							i++;
 							currentChar = input.charAt(i);
 						}
+						output = output + current;
 						changesArray[changesIndex][2] = current;
 						changesIndex++;
 						asMarker = false;
@@ -195,6 +197,7 @@ class stripper{
 					}
 				}else{
 					if(asMarker){
+						output = output + currentChar;
 						continue;
 					}else if (groupIdNeed || compressMarker){
 						output = output + currentChar;
