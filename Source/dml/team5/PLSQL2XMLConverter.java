@@ -1,46 +1,27 @@
-/**
- * @author Matthew Boyette (N00868808@ospreys.unf.edu)
- * @version 1.0
- * 
- *          This class converts the relational database output of unmodified Oracle PL/SQL selection statements into XML.
- */
 
 package dml.team5;
 
 import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import org.antlr.v4.runtime.ANTLRInputStream;
-import org.antlr.v4.runtime.CommonTokenStream;
+import javax.sql.rowset.CachedRowSet;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.tree.ParseTree;
-import dml.team5.antlr.PLSQLLexer;
-import dml.team5.antlr.PLSQLParser;
 
+/**
+ * @author Matthew Boyette (N00868808@ospreys.unf.edu)
+ * @version 1.1
+ * 
+ *          This class converts the relational database output of both unmodified and modified Oracle PL/SQL selection statements into XML.
+ */
 public class PLSQL2XMLConverter
 {
-    /**
-     * Lexically analyze the input {@link java.lang.String} as an Oracle PL/SQL query and return the {@link dml.team5.antlr.PLSQLParser}.
-     * 
-     * @param input
-     *            the input {@link java.lang.String}.
-     * @return the {@link dml.team5.antlr.PLSQLParser}.
-     * @since 1.0
-     */
-    protected static final PLSQLParser getParser(final String input)
-    {
-        ANTLRInputStream inputStream = new ANTLRInputStream(input);
-        PLSQLLexer lexer = new PLSQLLexer(inputStream);
-        CommonTokenStream tokens = new CommonTokenStream(lexer);
-        return new PLSQLParser(tokens);
-    }
+    private static final boolean DEBUG = true;
 
     /**
-     * Console-based command-line test driver. Each argument is an input {@link java.lang.String}.
+     * Simple console-based command-line test driver. Each argument is an input {@link java.lang.String}.
      * 
      * @param args
-     *            the command-line arguments.
+     *            the array of command-line arguments.
      * @since 1.0
      */
     public static final void main(final String[] args)
@@ -49,6 +30,7 @@ public class PLSQL2XMLConverter
         {
             for ( int i = 0; i < args.length; i++ )
             {
+                // Separate multiple pieces of output with blank lines.
                 if ( i > 0 )
                 {
                     System.out.println();
@@ -57,100 +39,78 @@ public class PLSQL2XMLConverter
                 System.out.println(new PLSQL2XMLConverter(args[i]));
             }
         }
-    }
-
-    /**
-     * Prints out each row's fields delimited by whitespace characters on separate lines.
-     * 
-     * @param results
-     *            the {@link java.sql.ResultSet} populated with the output of a SQL query.
-     * @param rsmd
-     *            the {@link java.sql.ResultSetMetaData} that corresponds to the results.
-     * @throws SQLException
-     *             if a database access error occurs.
-     * @since 1.0
-     */
-    public static final void printSQLResults(final ResultSet results, final ResultSetMetaData rsmd) throws SQLException
-    {
-        // Loop through rows.
-        while ( results.next() )
+        else
         {
-            // Buffer to store retrieved data.
-            StringBuffer printData = new StringBuffer();
-
-            // Loop through columns.
-            for ( int i = 0; i < rsmd.getColumnCount(); i++ )
-            {
-                // Store field data in buffer.
-                printData.append(results.getString(i + 1) + " ");
-            }
-
-            // Print buffer on new line.
-            System.out.println(printData.toString().trim());
+            System.out.println("Usage: " + args[0] + " <InputString1> <InputString2> ... <InputStringN>");
+            System.out.println("Remember to enclose strings containing whitepace with double-quotes!");
         }
     }
 
-    /**
-     * The input {@link java.lang.String}.
-     * 
-     * @since 1.0
+    private boolean isModified = false;
+    /*
+     * Declare private instance variables.
      */
-    private String input = "";
-
-    /**
-     * The output {@link java.lang.StringBuffer}.
-     * 
-     * @since 1.0
-     */
-    private StringBuffer output = new StringBuffer();
+    private String originalInput = "";
+    private String outputString  = "";
+    private String strippedInput = "";
 
     /**
      * Constructs a new instance of {@link dml.team5.PLSQL2XMLConverter} based on an input {@link java.lang.String}.
      * 
-     * @param input
+     * @param inputString
      *            the input {@link java.lang.String}.
      * @since 1.0
      */
-    public PLSQL2XMLConverter(final String input)
+    public PLSQL2XMLConverter(final String inputString)
     {
-        // Trim the input.
-        this.setInput(input.trim());
-        // Convert the input.
-        this.convert();
-    }
+        this.setOriginalInput(inputString.trim());
+        this.setStrippedInput(Stripper.strip(this.getOriginalInput()));
 
-    /**
-     * Constructs the output {@link java.lang.StringBuffer} based on the input {@link java.lang.String}.
-     * 
-     * @since 1.0
-     */
-    protected void convert()
-    {
-        // Declare variables to store the parser, the parse tree, the connection, and the query results.
-        PLSQLParser parser = null;
-        ParseTree tree = null;
+        // Declare variables to keep track of the parse tree, the connection, the query results, and whether we're doing pure SQL or modified SQL.
+        ParseTree parseTree = null;
         Connection connection = null;
-        ResultSet results = null;
+        CachedRowSet results = null;
+        String input = this.getOriginalInput();
 
         try
         {
-            // Parse the input query.
-            parser = PLSQL2XMLConverter.getParser(this.getInput());
-            tree = parser.sql_script();
+            // Parse the input query as unmodified PL/SQL.
+            parseTree = Utility.getParseTree(input, false, true);
+
+            // If the first parse fails, try parsing the input again as modified PL/SQL.
+            if ( parseTree == null )
+            {
+                this.setModified(true);
+                parseTree = Utility.getParseTree(input, true, false);
+            }
 
             try
             {
-                // Execute the input query.
+                // Connect to the Oracle database server.
                 connection = Utility.getConnection();
-                results = Utility.executeSQLStatement(connection, this.getInput());
+
+                // If the input is modified PL/SQL, strip out the modifications and make it legal SQL again.
+                if ( this.isModified() )
+                {
+                    input = this.getStrippedInput();
+                }
+
+                // Execute the input query.
+                results = Utility.executeSQLStatement(connection, input);
 
                 // Is the input query a select statement?
-                if ( this.getInput().toLowerCase().startsWith("select ") )
+                if ( input.toLowerCase().startsWith("select") )
                 {
                     if ( results != null )
                     {
+                        // If debugging, print out the table too.
+                        if ( PLSQL2XMLConverter.DEBUG )
+                        {
+                            System.out.println(Utility.writeSQLResults(results));
+                        }
+
                         // Construct the output XML.
-                        this.setOutput(this.getXMLResults(results, results.getMetaData()));
+                        this.setOutputString(Utility.writeXMLResults(results));
                     }
                 }
             }
@@ -164,7 +124,10 @@ public class PLSQL2XMLConverter
                 try
                 {
                     // Try to close the connection.
-                    connection.close();
+                    if ( connection != null )
+                    {
+                        connection.close();
+                    }
                 }
                 catch ( SQLException sqle )
                 {
@@ -188,86 +151,85 @@ public class PLSQL2XMLConverter
      * @return the input {@link java.lang.String}.
      * @since 1.0
      */
-    public final String getInput()
+    public final String getOriginalInput()
     {
-        return this.input;
+        return this.originalInput;
     }
 
     /**
-     * Returns the output {@link java.lang.StringBuffer}.
+     * Returns the stripped input {@link java.lang.String}.
      * 
-     * @return the output {@link java.lang.StringBuffer}.
-     * @since 1.0
+     * @return the stripped input {@link java.lang.String}.
+     * @since 1.1
      */
-    protected final StringBuffer getOutput()
+    public final String getStrippedInput()
     {
-        return this.output;
+        return this.strippedInput;
     }
 
     /**
-     * Construct an output {@link java.lang.StringBuffer} containing the XML.
-     * 
-     * @param results
-     *            the {@link java.sql.ResultSet} populated with the output of a SQL query.
-     * @param rsmd
-     *            the {@link java.sql.ResultSetMetaData} that corresponds to the results.
-     * @return a {@link java.lang.StringBuffer} containing the output XML.
-     * @throws SQLException
-     *             if a database access error occurs.
-     * @since 1.0
+     * @return the isModified
      */
-    protected StringBuffer getXMLResults(final ResultSet results, final ResultSetMetaData rsmd) throws SQLException
+    public final boolean isModified()
     {
-        // TODO: Convert the relational database output of the unmodified Oracle PL/SQL selection statement into XML.
-        StringBuffer output = new StringBuffer();
+        return isModified;
+    }
 
-        // Loop through rows.
-        while ( results.next() )
-        {
-            // Loop through columns.
-            for ( int i = 0; i < rsmd.getColumnCount(); i++ )
-            {
-                //
-            }
-        }
-
-        return output;
+    /**
+     * @param isModified
+     *            the isModified to set
+     */
+    protected final void setModified(boolean isModified)
+    {
+        this.isModified = isModified;
     }
 
     /**
      * Allows the input {@link java.lang.String} to be modified.
      * 
-     * @param input
+     * @param originalInput
      *            the input {@link java.lang.String}.
      * @since 1.0
      */
-    protected final void setInput(final String input)
+    protected final void setOriginalInput(final String originalInput)
     {
-        this.input = input;
+        this.originalInput = originalInput;
     }
 
     /**
-     * Allows the output {@link java.lang.StringBuffer} to be modified.
+     * Allows the output {@link java.lang.String} to be modified.
      * 
-     * @param output
-     *            the output {@link java.lang.StringBuffer}.
+     * @param outputString
+     *            the output {@link java.lang.String}.
      * @since 1.0
      */
-    protected final void setOutput(final StringBuffer output)
+    protected final void setOutputString(final String outputString)
     {
-        this.output = output;
+        this.outputString = outputString;
     }
 
     /**
-     * Returns a {@link java.lang.String} representation of the output {@link java.lang.StringBuffer}.
+     * Allows the stripped input {@link java.lang.String} to be modified.
      * 
-     * @return the output {@link java.lang.String} of the conversion process.
-     * @since 1.0
+     * @param strippedInput
+     *            the stripped input {@link java.lang.String}.
+     * @since 1.1
+     */
+    protected final void setStrippedInput(final String strippedInput)
+    {
+        this.strippedInput = strippedInput;
+    }
+
+    /**
+     * Return the output {@link java.lang.String}.
+     * 
+     * @return the output {@link java.lang.String}.
      * @see java.lang.Object#toString()
+     * @since 1.0
      */
     @Override
     public final String toString()
     {
-        return this.getOutput().toString();
+        return this.outputString;
     }
 }

@@ -1,12 +1,12 @@
+
+package dml.team5;
+
 /**
  * @author Matthew Boyette (N00868808@ospreys.unf.edu)
  * @version 1.0
  * 
  *          This helper class contains the configuration settings for the Oracle SQL relational database server.
  */
-
-package dml.team5;
-
 public final class OracleServerSettings
 {
     public final static String DATABASE = "dworcl";
