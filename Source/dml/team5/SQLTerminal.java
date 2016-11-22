@@ -166,6 +166,7 @@ class Stripper
                         {
                             changesArray[changesIndex][0] = "rename";
                             changesArray[changesIndex][1] = previous;
+                            output = output + "as";
                             i++;
                             asMarker = true;
                         }
@@ -239,6 +240,7 @@ class Stripper
                             i++;
                             currentChar = input.charAt(i);
                         }
+                        output = output + current;
                         changesArray[changesIndex][2] = current;
                         changesIndex++;
                         asMarker = false;
@@ -273,6 +275,7 @@ class Stripper
                 {
                     if ( asMarker )
                     {
+                        output = output + currentChar;
                         continue;
                     }
                     else if ( groupIdNeed || compressMarker )
