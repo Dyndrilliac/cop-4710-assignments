@@ -86,6 +86,8 @@ class stripper{
 		boolean asMarker = false;
 		boolean groupIdNeed = false;
 		int groupMarker = 0;
+		boolean notAs = false;
+		boolean notFrom = false;
 		while(true){
 			input = input.toLowerCase();
 			for(int i = 0; i < input.length(); i++){
@@ -97,24 +99,23 @@ class stripper{
 					groupIdNeed = true;
 				}else if (currentChar == '>'){
 					for(int j = changesIndex; j > -1; j--){
-						if(changesArray[j][0] == "group"){
-							if(changesArray[j][3] != null){
+						if(changesArray[j][0] != null && changesArray[j][0].equals("group")){
+							if(changesArray[j][2] != null){
 								continue;
 							}
-							changesArray[j][3] = previous;
+							changesArray[j][2] = previous;
 							break;
 						}
 					}
-					i++;
 					groupMarker--;
 				}
 				else if (currentChar == '+'){
 					compressMarker = true;
 					continue;
-				}else if (currentChar == 'a'){
+				}else if (!notAs && currentChar == 'a'){
 					if(current.length() > 0){
-						current = current + currentChar;
-						output = output + currentChar;
+						notAs = true;
+						i--;
 						continue;
 					}
 					if(input.charAt(i+1) == 's'){
@@ -125,48 +126,58 @@ class stripper{
 							i++;
 							asMarker = true;
 						}else{
-							current = current + currentChar;
-							output = output + currentChar;
+							notAs = true;
+							i--;
 						}
 					}else{
-						current = current + currentChar;
-						output = output + currentChar;
+						notAs = true;
+						i--;
 					}
-				}else if(currentChar == 'f'){
+				}else if(!notFrom && currentChar == 'f'){
+					System.out.println("caught f");
 					if (current.length() > 0){
+						System.out.println("caught here");
 						current = current + currentChar;
 						output = output + currentChar;
 						continue;
 					}
 					if(input.charAt(i+1) == 'r'){
+						System.out.println("caught r");
 						if(input.charAt(i+2) == 'o'){
+							System.out.println("caught o");
 							if(input.charAt(i+3) == 'm'){
-								if (!Character.isLowerCase(input.charAt(i+2))){
-									for (int k = i; i < input.length(); k++){
+								System.out.println("caught m");
+								if (!Character.isLowerCase(input.charAt(i+4))){
+									System.out.println("caught from");
+									for (int k = i; k < input.length(); k++){
 										currentChar = input.charAt(k);
 										output = output + currentChar;
 									}
 									System.out.println(Arrays.deepToString(changesArray));
 									return output;
 								}else{
-									current = current + currentChar;
-									output = output + currentChar;
+									notFrom = true;
+									i--;
+									System.out.println("thinks theres more after caught from ");
 								}
 							}else{
-								current = current + currentChar;
-								output = output + currentChar;
+								notFrom = true;
+								i--;
 							}
 						}else{
-							current = current + currentChar;
-							output = output + currentChar;
+							notFrom = true;
+							i--;
+							System.out.println("caught only f");
 						}
 					}else{
-						current = current + currentChar;
-						output = output + currentChar;
+						notFrom = true;
+						i--;
 					}
-				}else if(Character.isLowerCase(currentChar)){
+				}else if(Character.isLowerCase(currentChar)|| currentChar == '.' 
+						|| currentChar == '_'){
 					if(asMarker){
-						while (Character.isLowerCase(currentChar)){
+						while (Character.isLowerCase(currentChar) || currentChar == '.' 
+								|| currentChar == '_'){
 							current = current + currentChar;
 							i++;
 							currentChar = input.charAt(i);
@@ -177,7 +188,8 @@ class stripper{
 						asMarker = false;
 						i--;
 					}else if(groupIdNeed){
-						while (Character.isLowerCase(currentChar)){
+						while (Character.isLowerCase(currentChar) || currentChar == '.' 
+								|| currentChar == '_'){
 							current = current + currentChar;
 							i++;
 							currentChar = input.charAt(i);
@@ -185,14 +197,29 @@ class stripper{
 						changesArray[changesIndex][1] = current;
 						output = output + current;
 						if(compressMarker){
-							changesArray[changesIndex][4] = "compress";
+							changesArray[changesIndex][3] = "compress";
 							compressMarker = false;
 						}
 						changesIndex++;
 						groupIdNeed = false;
 						i--;
+					}else if(compressMarker){
+						while (Character.isLowerCase(currentChar) || currentChar == '.' 
+								|| currentChar == '_' || Character.isDigit(currentChar)){
+							current = current + currentChar;
+							i++;
+							currentChar = input.charAt(i);
+						}
+						changesArray[changesIndex][0] = "compress";
+						changesArray[changesIndex][1] = current;
+						output = output + current;
+						changesIndex++;
+						i--;
+						compressMarker = false;
 					}else{
 						current = current + currentChar;
+						notAs = true;
+						notFrom = true;
 						output = output + currentChar;
 					}
 				}else{
@@ -203,6 +230,8 @@ class stripper{
 						output = output + currentChar;
 						continue;
 					}else{
+						notAs = false;
+						notFrom = false;
 						output = output + currentChar;
 						if(current.length() > 0){
 							previous = current;
@@ -218,3 +247,5 @@ class stripper{
 	}
 }
 // select distinct name as salesperson, <customer, name as custname, <custaddress, street, city, phone,>,>, from s, c, orders, p where s = orders and c = orders and p = orders;
+// select distinct s.sname as salesperson_name, <+ customer, orders.cno as customer_no, orders.totqty,> from s, orders where s.sno = orders.sno;
+// select distinct faculty.address as address, + faculty.salary as salary from faculty;
