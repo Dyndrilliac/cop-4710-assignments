@@ -372,7 +372,7 @@ public final class Utility
 
         if ( selected_elements_string.contentEquals("*") )
         {
-            // Handle "SELECT * FROM <TABLE_LiST>" queries.
+            // Handle "SELECT * FROM <TABLE_LIST>" queries.
             // Nothing you can do except check every table sequentially to see if it contains the columnName for the given columnIndex.
             // No AS clause is possible, so no need to worry about discrepancies between columnName and columnLabel.
             for ( String table : Utility.TABLES )
