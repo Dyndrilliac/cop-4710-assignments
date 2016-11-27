@@ -7,6 +7,7 @@ import java.util.Locale;
 import javax.sql.rowset.CachedRowSet;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
 /**
  * @author Matthew Boyette (N00868808@ospreys.unf.edu)
@@ -19,7 +20,7 @@ import org.antlr.v4.runtime.tree.ParseTree;
 public final class PLSQL2XMLConverter extends LanguageConverter
 {
     /*
-     * Declare private static variables.
+     * Declare private static constants.
      */
     private static final boolean DEBUG = true;
 
@@ -122,6 +123,12 @@ public final class PLSQL2XMLConverter extends LanguageConverter
             // Try to parse the input query as unmodified PL/SQL.
             parseTree = Utility.getParseTree(input, false, false);
 
+            // Walk the parse tree to identify and store the table ID's.
+            ParseTreeWalker.DEFAULT.walk(new TableListener(), parseTree);
+
+            // Walk the parse tree to identify and store the selected elements.
+            ParseTreeWalker.DEFAULT.walk(new SelectedElementListener(), parseTree);
+
             try
             {
                 // Connect to the Oracle database server.
@@ -148,7 +155,7 @@ public final class PLSQL2XMLConverter extends LanguageConverter
                         }
 
                         // Construct the output XML.
-                        this.setOutputString(Utility.writeXMLResults(results, this, this.isDTD()));
+                        this.setOutputString(Utility.writeXMLResults(results, this));
                     }
                 }
 
@@ -186,29 +193,6 @@ public final class PLSQL2XMLConverter extends LanguageConverter
     public final String getStrippedInput()
     {
         return Stripper.strip(this.getOriginalInput());
-    }
-
-    /**
-     * Returns whether or not the input {@link java.lang.String} contains an AS clause.
-     * 
-     * @return true if the input {@link java.lang.String} contains an AS clause, false otherwise.
-     * @since 1.1
-     */
-    public final boolean hasAsClauseInInput()
-    {
-        // Declare an unassigned constant String reference.
-        final String selected_elements;
-
-        if ( this.isModified() )
-        {
-            selected_elements = Utility.extractFirstSubStringByPattern(this.getStrippedInput(), Utility.SELECTED_ELEMENT_PATTERN);
-        }
-        else
-        {
-            selected_elements = Utility.extractFirstSubStringByPattern(this.getOriginalInput(), Utility.SELECTED_ELEMENT_PATTERN);
-        }
-
-        return selected_elements.toLowerCase(Locale.ROOT).contains(" as ");
     }
 
     /**

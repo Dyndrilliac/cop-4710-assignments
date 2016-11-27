@@ -5,16 +5,13 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
 import javax.sql.rowset.CachedRowSet;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -44,10 +41,19 @@ import dml.team5.antlr.PLSQLParser;
  */
 public final class Utility
 {
-    public static final HashMap<String, List<String>> SCHEMA                   = new HashMap<String, List<String>>();
-    public static final String                        SELECTED_ELEMENT_PATTERN = "((?<=((S|s)(E|e)(L|l)(E|e)(C|c)(T|t))\\s+)(.+)(?=(\\s+(F|f)(R|r)(O|o)(M|m))))";
-    public static final List<String>                  TABLES                   = new ArrayList<String>();
+    public static final HashMap<String, List<String>> SCHEMA            = new HashMap<String, List<String>>();
+    public static final List<SelectedElement>         SELECTED_ELEMENTS = new ArrayList<SelectedElement>();
+    public static final List<String>                  TABLES            = new ArrayList<String>();
 
+    /**
+     * Builds a mapping of the database's schema, matching column names to table names.
+     * 
+     * @param connection
+     *            the {@link java.sql.Connection} to the database server.
+     * @throws SQLException
+     *             if a database access error occurs.
+     * @since 1.1
+     */
     public static final void buildSchemaMap(final Connection connection) throws SQLException
     {
         Utility.SCHEMA.clear();
@@ -55,8 +61,8 @@ public final class Utility
 
         for ( String table : Utility.TABLES )
         {
-            List<String> columns = new ArrayList<String>();
-            CachedRowSet results = Utility.executeSQLStatement(connection, "Describe " + table);
+            final List<String> columns = new ArrayList<String>();
+            final CachedRowSet results = Utility.executeSQLStatement(connection, "Describe " + table);
 
             while ( results.next() )
             {
@@ -64,18 +70,37 @@ public final class Utility
             }
 
             Utility.SCHEMA.put(table, columns);
+            results.close();
         }
     }
 
+    /**
+     * Build a list of all the relevant in the database if the current list is empty.
+     * 
+     * @param connection
+     *            the {@link java.sql.Connection} to the database server.
+     * @throws SQLException
+     *             if a database access error occurs.
+     * @since 1.1
+     */
     public static final void buildTableList(final Connection connection) throws SQLException
     {
         if ( Utility.TABLES.isEmpty() )
         {
-            CachedRowSet results = Utility.executeSQLStatement(connection, "Select TABLE_NAME From INFORMATION_SCHEMA.TABLES Where TABLE_SCHEMA = '" + OracleServerSettings.DATABASE() + "' Order By TABLE_NAME Asc");
+            final String query = "Select TABLE_NAME From INFORMATION_SCHEMA.TABLES Where TABLE_SCHEMA = '?' Order By TABLE_NAME Asc";
+            final PreparedStatement pstatement = connection.prepareStatement(query);
+
+            pstatement.setString(1, OracleServerSettings.DATABASE());
+
+            final CachedRowSet results = Utility.executeSQLStatement(pstatement);
+
             while ( results.next() )
             {
                 Utility.TABLES.add(results.getString(1));
             }
+
+            results.close();
+            pstatement.close();
         }
     }
 
@@ -86,8 +111,6 @@ public final class Utility
      *            the resulting {@link javax.sql.rowset.CachedRowSet} of a SQL query.
      * @param parent
      *            the parent instance of a {@link dml.team5.PLSQL2XMLConverter} object.
-     * @param isDTD
-     *            true to use the W3C Data Type Definition (DTD) format, false to use the W3C XML Schema Definition (XSD) format.
      * @return the {@link org.w3c.dom.Document}.
      * @throws ParserConfigurationException
      *             if a {@link javax.xml.parsers.DocumentBuilder} cannot be created which satisfies the configuration requested.
@@ -99,21 +122,21 @@ public final class Utility
      *             if an input/output error occurs.
      * @since 1.1
      */
-    public static final Document createDocument(CachedRowSet results, final PLSQL2XMLConverter parent, final boolean isDTD) throws ParserConfigurationException, SQLException, SAXException, IOException
+    public static final Document createDocument(CachedRowSet results, final PLSQL2XMLConverter parent) throws ParserConfigurationException, SQLException, SAXException, IOException
     {
         DocumentBuilder documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-        InputSource inputStream = new InputSource(new StringReader(Utility.writeXMLResults(results, parent, isDTD)));
+        InputSource inputStream = new InputSource(new StringReader(Utility.writeXMLResults(results, parent)));
         return documentBuilder.parse(inputStream);
     }
 
     /**
-     * Executes a SQL statement on the Oracle database server and returns the corresponding {@link javax.sql.rowset.CachedRowSet}.
+     * Executes a SQL statement on the database server and returns the corresponding {@link javax.sql.rowset.CachedRowSet}.
      * 
      * @param connection
-     *            the {@link java.sql.Connection}.
+     *            the {@link java.sql.Connection} to the database server.
      * @param inputString
      *            the input {@link java.lang.String} containing the SQL query.
-     * @return the {@link javax.sql.rowset.CachedRowSet}.
+     * @return the corresponding {@link javax.sql.rowset.CachedRowSet}.
      * @throws SQLException
      *             if a database access error occurs, or the given SQL statement produces anything other than a single {@link javax.sql.rowset.CachedRowSet} object.
      * @since 1.0
@@ -137,93 +160,31 @@ public final class Utility
     }
 
     /**
-     * Extracts the first substring that matches the Regular Expression pattern from a given {@link java.lang.String}.
+     * Executes a SQL statement on the database server and returns the corresponding {@link javax.sql.rowset.CachedRowSet}.
      * 
-     * @param s
-     *            the {@link java.lang.String} from which to extract the substring.
-     * @param p
-     *            the Regular Expression pattern {@link java.lang.String}.
-     * @return the extracted {@link java.lang.String}.
-     * @since 1.1
+     * @param pstatement
+     * @return the corresponding {@link javax.sql.rowset.CachedRowSet}.
+     * @throws SQLException
+     *             if a database access error occurs, or the given SQL statement produces anything other than a single {@link javax.sql.rowset.CachedRowSet} object.
+     * @since 1.0
      */
-    public static final String extractFirstSubStringByPattern(final String s, final String p)
+    public static final CachedRowSet executeSQLStatement(final PreparedStatement pstatement) throws SQLException
     {
-        List<String> results = Utility.extractSubStringsByPattern(s, p);
-        String result = "";
+        // Create the output buffer.
+        CachedRowSet results = new CachedRowSetImpl();
 
-        if ( !results.isEmpty() )
-        {
-            result = results.get(0);
-        }
+        // Store the results of the executed query in the output buffer.
+        results.populate(pstatement.executeQuery());
 
-        return result;
-    }
-
-    /**
-     * Extracts the last substring that matches the Regular Expression pattern from a given {@link java.lang.String}.
-     * 
-     * @param s
-     *            the {@link java.lang.String} from which to extract the substring.
-     * @param p
-     *            the Regular Expression pattern {@link java.lang.String}.
-     * @return the extracted {@link java.lang.String}.
-     * @since 1.1
-     */
-    public static final String extractLastSubStringByPattern(final String s, final String p)
-    {
-        List<String> results = Utility.extractSubStringsByPattern(s, p);
-        String result = "";
-
-        if ( !results.isEmpty() )
-        {
-            result = results.get(results.size() - 1);
-        }
-
-        return result;
-    }
-
-    /**
-     * Extracts every substring that matches the Regular Expression pattern from a given {@link java.lang.String}.
-     * 
-     * @param s
-     *            the {@link java.lang.String} from which to extract substrings.
-     * @param p
-     *            the Regular Expression pattern {@link java.lang.String}.
-     * @return the {@link java.util.List} of extracted {@link java.lang.String}s.
-     * @since 1.1
-     */
-    public static final List<String> extractSubStringsByPattern(final String s, final String p)
-    {
-        List<String> results = new ArrayList<String>();
-        Pattern pattern = null;
-        Matcher matcher = null;
-
-        try
-        {
-            pattern = Pattern.compile(p);
-        }
-        catch ( final PatternSyntaxException pse )
-        {
-            pse.printStackTrace();
-            return results;
-        }
-
-        matcher = pattern.matcher(s);
-
-        while ( matcher.find() )
-        {
-            results.add(matcher.group().trim());
-        }
-
+        // Return the output buffer.
         return results;
     }
 
     /**
-     * Establishes a {@link java.sql.Connection} to the Oracle database server.
+     * Establishes a {@link java.sql.Connection} to the database server.
      * 
      * @param isOracle
-     *            .
-     * @return the {@link java.sql.Connection}.
+     * @return the {@link java.sql.Connection} to the database server.
      * @throws SQLException
      *             if a database access error occurs.
      * @since 1.0
@@ -255,35 +216,27 @@ public final class Utility
      */
     public static final Parser getParser(final String inputString, final boolean isModified)
     {
-        // Declare the variables.
-        ANTLRInputStream inputStream = null;
+        // Declare the lexer variable.
         Lexer lexer = null;
-        CommonTokenStream tokens = null;
-
-        // Pass the input string to ANTLR.
-        inputStream = new ANTLRInputStream(inputString);
 
         // Invoke the lexer with the input string.
         if ( isModified )
         {
-            lexer = new ModifiedPLSQLLexer(inputStream);
+            lexer = new ModifiedPLSQLLexer(new ANTLRInputStream(inputString));
         }
         else
         {
-            lexer = new PLSQLLexer(inputStream);
+            lexer = new PLSQLLexer(new ANTLRInputStream(inputString));
         }
-
-        // Populate the token stream with the lexer's output.
-        tokens = new CommonTokenStream(lexer);
 
         // Return an instance of the parser.
         if ( isModified )
         {
-            return new ModifiedPLSQLParser(tokens);
+            return new ModifiedPLSQLParser(new CommonTokenStream(lexer));
         }
         else
         {
-            return new PLSQLParser(tokens);
+            return new PLSQLParser(new CommonTokenStream(lexer));
         }
     }
 
@@ -352,107 +305,93 @@ public final class Utility
         return Utility.getParseTree(Utility.getParser(inputString, isModified), isSilent);
     }
 
-    private static final String[] getXMLStrings(final CachedRowSet results, int columnIndex, PLSQL2XMLConverter parent) throws SQLException
+    /**
+     * @param results
+     *            the {@link javax.sql.rowset.CachedRowSet} resulting from executing a SQL query.
+     * @param columnIndex
+     * @param parent
+     *            the parent instance of a {@link dml.team5.PLSQL2XMLConverter} object.
+     * @return
+     * @throws SQLException
+     *             if a database access error occurs.
+     * @since 1.1
+     */
+    public static final String getTableName(final CachedRowSet results, final int columnIndex, final PLSQL2XMLConverter parent) throws SQLException
     {
-        String tableName = results.getMetaData().getTableName(columnIndex).trim();
-        String columnName = results.getMetaData().getColumnName(columnIndex).trim();
-        String columnLabel = results.getMetaData().getColumnLabel(columnIndex).trim();
+        String tableName = "";
 
-        final String selected_elements_string;
-        final String[] selected_elements;
-
-        if ( parent.isModified() )
+        for ( String table : Utility.TABLES )
         {
-            selected_elements_string = Utility.extractFirstSubStringByPattern(parent.getStrippedInput(), Utility.SELECTED_ELEMENT_PATTERN);
-        }
-        else
-        {
-            selected_elements_string = Utility.extractFirstSubStringByPattern(parent.getOriginalInput(), Utility.SELECTED_ELEMENT_PATTERN);
-        }
-
-        if ( selected_elements_string.contentEquals("*") )
-        {
-            // Handle "SELECT * FROM <TABLE_LIST>" queries.
-            // Nothing you can do except check every table sequentially to see if it contains the columnName for the given columnIndex.
-            // No AS clause is possible, so no need to worry about discrepancies between columnName and columnLabel.
-            for ( String table : Utility.TABLES )
+            if ( tableName.isEmpty() )
             {
-                if ( tableName.isEmpty() )
+                List<String> columns = Utility.SCHEMA.get(table);
+                ResultSetMetaData rsmd = results.getMetaData();
+
+                for ( String column : columns )
                 {
-                    List<String> columns = Utility.SCHEMA.get(table);
-                    ResultSetMetaData rsmd = results.getMetaData();
-
-                    for ( String column : columns )
+                    if ( column.equalsIgnoreCase(rsmd.getColumnName(columnIndex)) )
                     {
-                        if ( column.equalsIgnoreCase(rsmd.getColumnName(columnIndex)) )
-                        {
-                            tableName = table;
-                            break;
-                        }
-                    }
-                }
-                else
-                {
-                    break;
-                }
-            }
-        }
-        else
-        {
-            // Handle "SELECT [<TABLE>.]<E1>[, [<TABLE>.]<E2>[, ...]] FROM <TABLE_LIST>" queries.
-            selected_elements = ( selected_elements_string ).split(",");
-
-            if ( ( columnIndex > 0 ) && ( columnIndex <= selected_elements.length ) )
-            {
-                final String selected_element = selected_elements[columnIndex - 1];
-
-                // Two possibilities exist: either the selected element is fully qualified and includes its table name, or it isn't and it doesn't.
-                if ( selected_element.contains(".") )
-                {
-                    // If it's fully qualified, just extract the table name.
-                    if ( tableName.isEmpty() )
-                    {
-                        tableName = selected_element.substring(0, selected_element.indexOf("."));
-                    }
-
-                    // Handle AS clause.
-                    if ( selected_element.toLowerCase(Locale.ROOT).contains(" as ") )
-                    {
-                        columnName = selected_element.substring(selected_element.indexOf(".") + 1, selected_element.indexOf(" "));
-                        columnLabel = selected_element.substring(selected_element.lastIndexOf(" ") + 1);
-                    }
-                    else
-                    {
-                        columnName = selected_element.substring(selected_element.indexOf(".") + 1);
-                        columnLabel = columnName;
-                    }
-                }
-                else
-                {
-                    // If it's not fully qualified, then we have to do some additional shenanigans.
-                    if ( tableName.isEmpty() )
-                    {
-                        // TODO: Figure out tableName.
-                        tableName = "?";
-                    }
-
-                    // Handle AS clause.
-                    if ( selected_element.toLowerCase(Locale.ROOT).contains(" as ") )
-                    {
-                        columnName = selected_element.substring(0, selected_element.indexOf(" "));
-                        columnLabel = selected_element.substring(selected_element.lastIndexOf(" ") + 1);
-                    }
-                    else
-                    {
-                        columnName = selected_element;
-                        columnLabel = columnName;
+                        tableName = table;
+                        break;
                     }
                 }
             }
+            else
+            {
+                break;
+            }
         }
 
-        String[] xmlStrings = { tableName, columnName, columnLabel.toUpperCase(Locale.ROOT) };
-        return xmlStrings;
+        return tableName;
+    }
+
+    /**
+     * @param results
+     *            the {@link javax.sql.rowset.CachedRowSet} resulting from executing a SQL query.
+     * @param columnIndex
+     * @param parent
+     *            the parent instance of a {@link dml.team5.PLSQL2XMLConverter} object.
+     * @return
+     * @throws SQLException
+     *             if a database access error occurs.
+     * @since 1.1
+     */
+    private static final SelectedElement getXMLStrings(final CachedRowSet results, final int columnIndex, final PLSQL2XMLConverter parent) throws SQLException
+    {
+        String tableName = "";
+        String columnName = "";
+        String columnLabel = "";
+
+        if ( !Utility.SELECTED_ELEMENTS.isEmpty() )
+        {
+            SelectedElement sel_elem = Utility.SELECTED_ELEMENTS.get(columnIndex - 1);
+
+            tableName = sel_elem.tableName;
+            columnName = sel_elem.columnName;
+            columnLabel = sel_elem.columnLabel;
+        }
+
+        if ( tableName.isEmpty() )
+        {
+            tableName = Utility.getTableName(results, columnIndex, parent);
+
+            if ( tableName.isEmpty() )
+            {
+                tableName = results.getMetaData().getTableName(columnIndex).trim();
+            }
+        }
+
+        if ( columnName.isEmpty() )
+        {
+            columnName = results.getMetaData().getColumnName(columnIndex).trim();
+        }
+
+        if ( columnLabel.isEmpty() )
+        {
+            columnLabel = results.getMetaData().getColumnLabel(columnIndex).trim();
+        }
+
+        return new SelectedElement(tableName, columnName, columnLabel);
     }
 
     /**
@@ -461,7 +400,7 @@ public final class Utility
      * @param s
      *            the {@link java.lang.String} to pad.
      * @param n
-     *            minimum string length.
+     *            the minimum string length.
      * @return the whitespace padded {@link java.lang.String}.
      * @since 1.1
      */
@@ -477,7 +416,7 @@ public final class Utility
      * @param s
      *            the {@link java.lang.String} to pad.
      * @param n
-     *            minimum string length.
+     *            the minimum string length.
      * @return the whitespace padded {@link java.lang.String}.
      * @since 1.1
      */
@@ -488,7 +427,7 @@ public final class Utility
     }
 
     /**
-     * Creates constructs a table {@link java.lang.String} from the results of a SQL query in the form of a {@link javax.sql.rowset.CachedRowSet} object.
+     * Constructs a table {@link java.lang.String} from the results of a SQL query in the form of a {@link javax.sql.rowset.CachedRowSet} object.
      * 
      * @param results
      *            the {@link javax.sql.rowset.CachedRowSet} resulting from executing a SQL query.
@@ -504,7 +443,7 @@ public final class Utility
     }
 
     /**
-     * Creates constructs a table {@link java.lang.String} from the results of a SQL query in the form of a {@link javax.sql.rowset.CachedRowSet} object.
+     * Constructs a table {@link java.lang.String} from the results of a SQL query in the form of a {@link javax.sql.rowset.CachedRowSet} object.
      * 
      * @param results
      *            the {@link javax.sql.rowset.CachedRowSet} resulting from executing a SQL query.
@@ -607,14 +546,12 @@ public final class Utility
      *            the {@link javax.sql.rowset.CachedRowSet} resulting from executing a SQL query.
      * @param parent
      *            the parent instance of a {@link dml.team5.PLSQL2XMLConverter} object.
-     * @param isDTD
-     *            true to use the W3C Data Type Definition (DTD) format, false to use the W3C XML Schema Definition (XSD) format.
      * @return the XML {@link java.lang.String}.
      * @throws SQLException
      *             if a database access error occurs.
      * @since 1.1
      */
-    public static final String writeXMLResults(final CachedRowSet results, final PLSQL2XMLConverter parent, final boolean isDTD) throws SQLException
+    public static final String writeXMLResults(final CachedRowSet results, final PLSQL2XMLConverter parent) throws SQLException
     {
         // Declare data structures.
         final ResultSetMetaData rsmd = results.getMetaData();
@@ -639,11 +576,11 @@ public final class Utility
             for ( int i = 1; i <= rsmd.getColumnCount(); i++ )
             {
                 // Declare default strings.
-                String[] xmlStrings = Utility.getXMLStrings(results, i, parent);
+                SelectedElement xmlStrings = Utility.getXMLStrings(results, i, parent);
                 final Object VALUE = results.getObject(i);
 
                 // Write opening attribute tag.
-                output.append("\t\t<" + xmlStrings[2] + " table=\"" + xmlStrings[0] + "\" name=\"" + xmlStrings[1] + "\">");
+                output.append("\t\t<" + xmlStrings.columnLabel + " table=\"" + xmlStrings.tableName + "\" name=\"" + xmlStrings.columnName + "\">");
 
                 if ( VALUE != null )
                 {
@@ -652,7 +589,7 @@ public final class Utility
                 }
 
                 // Write closing attribute tag.
-                output.append("</" + xmlStrings[2] + ">\n");
+                output.append("</" + xmlStrings.columnLabel + ">\n");
             }
 
             // Write closing record tag.
