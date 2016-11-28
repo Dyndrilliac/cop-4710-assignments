@@ -14,7 +14,7 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker;
  * This class converts the relational database output of both unmodified and modified Oracle PL/SQL selection statements into XML.
  * </p>
  * <p>
- * Command-line usage: <code>{@link dml.team5.PLSQL2XMLConverter} InputString1 InputString2 ... InputStringN</code>
+ * Command-line usage: <code>java {@link dml.team5.PLSQL2XMLConverter} InputString1 InputString2 ... InputStringN</code>
  * </p>
  * <p>
  * Remember to enclose strings containing whitespace with double-quotes!
@@ -60,7 +60,7 @@ public final class PLSQL2XMLConverter extends LanguageConverter
         else
         {
             // If no input is given, show the user how to invoke the program.
-            System.out.println("Usage: " + args[0] + " InputString1 InputString2 ... InputStringN");
+            System.out.println("Usage: " + PLSQL2XMLConverter.class.getSimpleName() + " InputString1 InputString2 ... InputStringN");
             System.out.println("Remember to enclose strings containing whitespace with double-quotes!");
         }
     }
