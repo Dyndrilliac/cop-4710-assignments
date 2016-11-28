@@ -5,7 +5,7 @@ import java.util.Locale;
 
 /**
  * <p>
- * This helper class is a simple data structure to store information about selected elements.
+ * This helper class is a simple data structure for storing information about selected elements.
  * </p>
  * 
  * @author Matthew Boyette (N00868808@ospreys.unf.edu)

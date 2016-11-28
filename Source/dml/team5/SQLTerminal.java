@@ -6,7 +6,7 @@ import java.util.Scanner;
 
 /**
  * <p>
- * This class contains a more sophisticated console driver to interact with the user and control the program.
+ * This class contains a sophisticated console driver to interact with the user and control the program.
  * </p>
  * 
  * @author Merrillee Palmer (N00449190@ospreys.unf.edu)

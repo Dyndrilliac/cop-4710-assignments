@@ -134,21 +134,27 @@ public final class PLSQL2XMLConverter extends LanguageConverter
         Connection connection = null;
         CachedRowSet results = null;
 
+        // Is the input a SELECT query?
+        boolean isInputSelect = input.toLowerCase(Locale.ROOT).startsWith("select");
+
         try
         {
             // Try to parse the input query silently as unmodified PL/SQL.
-            parseTree = Utility.getParseTree(input, false, true);
+            parseTree = Utility.getParseTree(input, this.isModified(), true);
 
             if ( parseTree == null )
             {
-                // If the silent parse fails, set the isModified flag to true.
-                this.setModified(false);
+                if ( isInputSelect )
+                {
+                    // If the silent parse fails, set the isModified flag to true.
+                    this.setModified(true);
 
-                // Try to parse the input query as modified PL/SQL.
-                parseTree = Utility.getParseTree(input, true, false);
+                    // Try to parse the input query as modified PL/SQL.
+                    parseTree = Utility.getParseTree(input, this.isModified(), false);
 
-                // If the input query is modified PL/SQL, strip out the modifications and make it unmodified PL/SQL again.
-                input = this.getStrippedInput();
+                    // If the input query is modified PL/SQL and a SELECT query, then strip out the modifications and make it unmodified PL/SQL again.
+                    input = this.getStrippedInput();
+                }
             }
 
             // Try to parse the input query as unmodified PL/SQL.
@@ -177,7 +183,7 @@ public final class PLSQL2XMLConverter extends LanguageConverter
                 if ( results != null )
                 {
                     // Is the input query a select statement?
-                    if ( input.toLowerCase(Locale.ROOT).startsWith("select") )
+                    if ( isInputSelect )
                     {
                         // If debugging, print out the table too.
                         if ( this.isDebugMode() )
@@ -188,10 +194,10 @@ public final class PLSQL2XMLConverter extends LanguageConverter
                         // Construct the output XML.
                         this.setOutputString(Utility.writeXMLResults(results));
                     }
-                }
 
-                // Try to close the result set.
-                results.close();
+                    // Try to close the result set.
+                    results.close();
+                }
             }
             catch ( final SQLException sqle )
             {

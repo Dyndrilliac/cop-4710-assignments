@@ -3,7 +3,7 @@ package dml.team5;
 
 /**
  * <p>
- * This class provides a method to strip out the modifications to the syntax for the SELECT query.
+ * This class provides a method to strip out our modifications to the SELECT query SQL syntax.
  * </p>
  * 
  * @author Merrillee Palmer (N00449190@ospreys.unf.edu)
