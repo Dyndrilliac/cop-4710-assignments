@@ -15,7 +15,6 @@ import java.util.Scanner;
  */
 public class SQLTerminal
 {
-
     /**
      * <p>
      * Sophisticated console-based driver which interacts with the user and controls the program.
