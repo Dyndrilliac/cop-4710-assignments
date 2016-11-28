@@ -1,329 +1,205 @@
 
 package dml.team5;
 
+import java.util.Locale;
 import java.util.Scanner;
 
+/**
+ * @author Merrillee Palmer (N00449190@ospreys.unf.edu)
+ * @author Matthew Boyette (N00868808@ospreys.unf.edu)
+ * @version 1.1
+ * 
+ *          This class contains a more sophisticated console driver to interact with the user and control the program.
+ */
 public class SQLTerminal
 {
-    static int             option;
-    static String          SQLInput;
-    static String          SQLOutput;
-    static String          temp;
-    private static Scanner userInput = new Scanner(System.in);
-    static String          XMLInput;
-    static String          XMLOutput;
 
-    public static void main(String args[])
+    /**
+     * Sophisticated console-based driver which interacts with the user and controls the program.
+     * 
+     * @param args
+     *            the array of command-line arguments.
+     * @since 1.0
+     */
+    public static final void main(final String args[])
     {
-        while ( true )
-        {
-            System.out.println("**********Option Menu**********");
-            System.out.println("1. DTD");
-            System.out.println("2. XSD");
-            System.out.println("*******************************");
-            temp = userInput.nextLine();
-            if ( temp.equals("1") )
-            {
-                option = 1;
-                break;
-            }
-            else if ( temp.equals("2") )
-            {
-                option = 2;
-                break;
-            }
-            else
-            {
-                System.out.println("The option you entered is not valid.  Please try again.");
-                continue;
-            }
-        }
-        System.out.println("If at any time you wish to switch between DTD and XSD, enter 1 for DTD or 2 for XSD in the Command Line.");
-        SQLInput = "";
-        while ( true )
-        {
-            temp = "";
-            System.out.println("Command Line Input: ");
-            temp = userInput.nextLine();
-            System.out.println(temp);
-            if ( temp.length() == 1 && temp.charAt(0) == '1' )
-            {
-                System.out.println("You have changed output to DTD.");
-                option = 1;
-                continue;
-            }
-            else if ( temp.length() == 1 && temp.charAt(0) == '2' )
-            {
-                System.out.println("You have changed output to XSD.");
-                option = 2;
-                continue;
-            }
-            else if ( temp.equals("exit") )
-            {
-                System.out.println("Now exiting.");
-                System.exit(0);
-            }
-            if ( !temp.contains(";") )
-            {
-                if ( SQLInput.length() == 0 )
-                {
-                    SQLInput = temp;
-                }
-                else
-                {
-                    SQLInput = SQLInput.concat(" ").concat(temp);
-                }
-                continue;
-            }
-            else
-            {
-                if ( SQLInput.length() == 0 )
-                {
-                    SQLInput = temp;
-                }
-                else
-                {
-                    SQLInput = SQLInput.concat(" ").concat(temp);
-                }
-            }
-            // call the connect class
-            SQLOutput = Stripper.strip(SQLInput);
-            System.out.println(SQLOutput);
-            // call class to strip
-            // call class to parse
-            // call class to send to oracle
-            // call class to create XML
-            // call the close class
-            SQLInput = "";
-        }
-    }
-}
+        Scanner userInput = new Scanner(System.in);
+        String input = "", output = "";
+        boolean exitFlag = false, isOracle = true, isDebugMode = false, isDTD = true;
 
-class Stripper
-{
-    public static String[][] changesArray;
-    private static String    output;
+        System.out.println("Welcome to the SQL2XML program!\n");
 
-    static String strip(String input)
-    {
-        output = "";
-        changesArray = new String[100][4];
-        int changesIndex = 0;
-        char currentChar;
-        String previous = "";
-        boolean compressMarker = false;
-        String current = "";
-        boolean asMarker = false;
-        boolean groupIdNeed = false;
-        boolean notAs = false;
-        boolean notFrom = false;
-        while ( true )
+        do
         {
-            input = input.toLowerCase();
-            for ( int i = 0; i < input.length(); i++ )
+            StringBuffer inputBuffer = new StringBuffer();
+            boolean isInputDone = false;
+
+            System.out.println("You may enter any valid SQL command below. Terminate input with a semicolon.");
+            System.out.println("For a list of special commands, type help. To exit the program, type exit.\n");
+
+            do
             {
-                currentChar = input.charAt(i);
-                if ( currentChar == '<' )
+                System.out.print("$sql2xml> ");
+                System.out.flush();
+
+                String s = userInput.nextLine();
+
+                if ( s.contains(";") )
                 {
-                    changesArray[changesIndex][0] = "group";
-                    current = "";
-                    groupIdNeed = true;
+                    isInputDone = true;
+                    s = s.substring(0, s.indexOf(";"));
                 }
-                else if ( currentChar == '>' )
+
+                inputBuffer.append(s.trim());
+            }
+            while ( !isInputDone );
+
+            input = inputBuffer.toString().trim();
+
+            if ( !input.isEmpty() )
+            {
+                System.out.println();
+
+                switch ( input.toLowerCase(Locale.ROOT) )
                 {
-                    for ( int j = changesIndex; j > -1; j-- )
-                    {
-                        if ( changesArray[j][0] != null && changesArray[j][0].equals("group") )
+                    case "help":
+                        System.out.println("\thelp:\tdisplay this help menu.");
+                        System.out.println("\texit:\texit the program.");
+                        System.out.println("\tsetup:\tconfigure custom program settings.\n");
+                        break;
+
+                    case "exit":
+                        exitFlag = true;
+                        break;
+
+                    case "setup":
+                        String command = "";
+                        boolean setupFlag = false;
+
+                        do
                         {
-                            if ( changesArray[j][2] != null )
+                            StringBuffer commandBuffer = new StringBuffer();
+                            boolean isCommandDone = false;
+
+                            System.out.println("Setup mode engaged. Terminate input with a semicolon.");
+                            System.out.println("For a list of properties and their current values, type get.");
+                            System.out.println("To change a property's value, type set <propertyName> <newValue>.");
+                            System.out.println("To exit setup mode and return to normal execution, type exit.\n");
+
+                            do
                             {
-                                continue;
-                            }
-                            changesArray[j][2] = previous;
-                            break;
-                        }
-                    }
-                }
-                else if ( currentChar == '+' )
-                {
-                    compressMarker = true;
-                    continue;
-                }
-                else if ( !notAs && currentChar == 'a' )
-                {
-                    if ( current.length() > 0 )
-                    {
-                        notAs = true;
-                        i--;
-                        continue;
-                    }
-                    if ( input.charAt(i + 1) == 's' )
-                    {
-                        if ( !Character.isLowerCase(input.charAt(i + 2)) )
-                        {
-                            changesArray[changesIndex][0] = "rename";
-                            changesArray[changesIndex][1] = previous;
-                            output = output + "as";
-                            i++;
-                            asMarker = true;
-                        }
-                        else
-                        {
-                            notAs = true;
-                            i--;
-                        }
-                    }
-                    else
-                    {
-                        notAs = true;
-                        i--;
-                    }
-                }
-                else if ( !notFrom && currentChar == 'f' )
-                {
-                    // System.out.println("caught f");
-                    if ( current.length() > 0 )
-                    {
-                        // System.out.println("caught here");
-                        current = current + currentChar;
-                        output = output + currentChar;
-                        continue;
-                    }
-                    if ( input.charAt(i + 1) == 'r' )
-                    {
-                        // System.out.println("caught r");
-                        if ( input.charAt(i + 2) == 'o' )
-                        {
-                            // System.out.println("caught o");
-                            if ( input.charAt(i + 3) == 'm' )
-                            {
-                                // System.out.println("caught m");
-                                if ( !Character.isLowerCase(input.charAt(i + 4)) )
+                                System.out.print("$setup> ");
+                                System.out.flush();
+
+                                String s = userInput.nextLine();
+
+                                if ( s.contains(";") )
                                 {
-                                    // System.out.println("caught from");
-                                    for ( int k = i; k < input.length(); k++ )
-                                    {
-                                        currentChar = input.charAt(k);
-                                        output = output + currentChar;
-                                    }
-                                    // System.out.println(Arrays.deepToString(changesArray));
-                                    return output;
+                                    isCommandDone = true;
+                                    s = s.substring(0, s.indexOf(";"));
                                 }
-                                else
+
+                                commandBuffer.append(" " + s.trim());
+                            }
+                            while ( !isCommandDone );
+
+                            command = commandBuffer.toString().trim();
+
+                            if ( !command.isEmpty() )
+                            {
+                                System.out.println();
+
+                                switch ( command.toLowerCase(Locale.ROOT) )
                                 {
-                                    notFrom = true;
-                                    i--;
-                                    // System.out.println("thinks theres more after caught from ");
+                                    case "exit":
+                                        setupFlag = true;
+                                        break;
+
+                                    case "get":
+                                        System.out.println("\tdatabaseString\t- " + Utility.padRight(ServerSettings.getDatabase(), 30) + " - the name of the database with which to connect.");
+                                        System.out.println("\tpasswordString\t- " + Utility.padRight(ServerSettings.getPassword(), 30) + " - the password that corresponds to the provided username.");
+                                        System.out.println("\tportString\t- " + Utility.padRight(ServerSettings.getPort(), 30) + " - the port on which the database server is listening for connections.");
+                                        System.out.println("\tserverString\t- " + Utility.padRight(ServerSettings.getServer(), 30) + " - the domain or IP address belonging to the database server.");
+                                        System.out.println("\tusernameString\t- " + Utility.padRight(ServerSettings.getDatabase(), 30) + " - the name which uniquely identifies each user account.");
+                                        System.out.println("\tisOracle\t- " + Utility.padRight(Boolean.toString(isOracle), 30) + " - true to connect to an Oracle database, false to connect to a MySQL database.");
+                                        System.out.println("\tisDebugMode\t- " + Utility.padRight(Boolean.toString(isDebugMode), 30) + " - true to print the SQL table in addition to the XML tags, false otherwise.");
+                                        System.out.println("\tisDTD\t\t- " + Utility.padRight(Boolean.toString(isDTD), 30) + " - true to use the W3C Data Type Definition (DTD) format, false to use the W3C XML Schema Definition (XSD) format.");
+                                        System.out.println();
+                                        break;
+
+                                    default:
+                                        String[] commandParts = command.split("\\s", 3);
+
+                                        if ( commandParts.length == 3 )
+                                        {
+                                            if ( commandParts[0].trim().toLowerCase(Locale.ROOT).contentEquals("set") )
+                                            {
+                                                switch ( commandParts[1].trim() )
+                                                {
+                                                    case "databaseString":
+                                                        ServerSettings.setDatabase(commandParts[2].trim());
+                                                        break;
+
+                                                    case "passwordString":
+                                                        ServerSettings.setPassword(commandParts[2].trim());
+                                                        break;
+
+                                                    case "portString":
+                                                        ServerSettings.setPort(commandParts[2].trim());
+                                                        break;
+
+                                                    case "serverString":
+                                                        ServerSettings.setServer(commandParts[2].trim());
+                                                        break;
+
+                                                    case "usernameString":
+                                                        ServerSettings.setUsername(commandParts[2].trim());
+                                                        break;
+
+                                                    case "isOracle":
+                                                        isOracle = Boolean.parseBoolean(commandParts[2].trim());
+                                                        break;
+
+                                                    case "isDebugMode":
+                                                        isDebugMode = Boolean.parseBoolean(commandParts[2].trim());
+                                                        break;
+
+                                                    case "isDTD":
+                                                        isDTD = Boolean.parseBoolean(commandParts[2].trim());
+                                                        break;
+
+                                                    default:
+                                                        System.out.println("Setup error: unrecognized variable.\n");
+                                                        break;
+                                                }
+                                            }
+                                            else
+                                            {
+                                                System.out.println("Setup error: unrecognized command.\n");
+                                            }
+                                        }
+                                        else
+                                        {
+                                            System.out.println("Setup error: incorrect number of command parameters.\n");
+                                        }
+                                        break;
                                 }
                             }
-                            else
-                            {
-                                notFrom = true;
-                                i--;
-                            }
                         }
-                        else
-                        {
-                            notFrom = true;
-                            i--;
-                            // System.out.println("caught only f");
-                        }
-                    }
-                    else
-                    {
-                        notFrom = true;
-                        i--;
-                    }
-                }
-                else if ( Character.isLowerCase(currentChar) || currentChar == '.' || currentChar == '_' )
-                {
-                    if ( asMarker )
-                    {
-                        while ( Character.isLowerCase(currentChar) || currentChar == '.' || currentChar == '_' )
-                        {
-                            current = current + currentChar;
-                            i++;
-                            currentChar = input.charAt(i);
-                        }
-                        output = output + current;
-                        changesArray[changesIndex][2] = current;
-                        changesIndex++;
-                        asMarker = false;
-                        i--;
-                    }
-                    else if ( groupIdNeed )
-                    {
-                        while ( Character.isLowerCase(currentChar) || currentChar == '.' || currentChar == '_' )
-                        {
-                            current = current + currentChar;
-                            i++;
-                            currentChar = input.charAt(i);
-                        }
-                        changesArray[changesIndex][1] = current;
-                        output = output + current;
-                        if ( compressMarker )
-                        {
-                            changesArray[changesIndex][3] = "compress";
-                            compressMarker = false;
-                        }
-                        changesIndex++;
-                        groupIdNeed = false;
-                        i--;
-                    }
-                    else if ( compressMarker )
-                    {
-                        while ( Character.isLowerCase(currentChar) || currentChar == '.' || currentChar == '_' || Character.isDigit(currentChar) )
-                        {
-                            current = current + currentChar;
-                            i++;
-                            currentChar = input.charAt(i);
-                        }
-                        changesArray[changesIndex][0] = "compress";
-                        changesArray[changesIndex][1] = current;
-                        output = output + current;
-                        changesIndex++;
-                        i--;
-                        compressMarker = false;
-                    }
-                    else
-                    {
-                        current = current + currentChar;
-                        notAs = true;
-                        notFrom = true;
-                        output = output + currentChar;
-                    }
-                }
-                else
-                {
-                    if ( asMarker )
-                    {
-                        output = output + currentChar;
-                        continue;
-                    }
-                    else if ( groupIdNeed || compressMarker )
-                    {
-                        output = output + currentChar;
-                        continue;
-                    }
-                    else
-                    {
-                        notAs = false;
-                        notFrom = false;
-                        output = output + currentChar;
-                        if ( current.length() > 0 )
-                        {
-                            previous = current;
-                        }
-                        current = "";
-                    }
+                        while ( !setupFlag );
+                        break;
+
+                    default:
+                        output = ( new PLSQL2XMLConverter(input, isOracle, isDebugMode, isDTD) ).toString();
+                        System.out.println(output);
+                        break;
                 }
             }
-            break;
+
+            System.out.flush();
         }
-        // System.out.println(Arrays.deepToString(changesArray));
-        return output;
+        while ( !exitFlag );
+
+        userInput.close();
     }
 }
-// select distinct name as salesperson, <customer, name as custname, <custaddress, street, city, phone,>,>, from s, c, orders, p where s = orders and c = orders and p = orders;
-// select distinct s.sname as salesperson_name, <+ customer, orders.cno as customer_no, orders.totqty,> from s, orders where s.sno = orders.sno;
-// select distinct faculty.address as address, + faculty.salary as salary from faculty;

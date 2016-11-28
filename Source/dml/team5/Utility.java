@@ -75,7 +75,7 @@ public final class Utility
     }
 
     /**
-     * Build a list of all the relevant in the database if the current list is empty.
+     * Build a list of all the relevant table names in the database if the current list is empty.
      * 
      * @param connection
      *            the {@link java.sql.Connection} to the database server.
@@ -90,7 +90,7 @@ public final class Utility
             final String query = "Select TABLE_NAME From INFORMATION_SCHEMA.TABLES Where TABLE_SCHEMA = '?' Order By TABLE_NAME Asc";
             final PreparedStatement pstatement = connection.prepareStatement(query);
 
-            pstatement.setString(1, OracleServerSettings.DATABASE());
+            pstatement.setString(1, ServerSettings.getDatabase());
 
             final CachedRowSet results = Utility.executeSQLStatement(pstatement);
 
@@ -109,8 +109,6 @@ public final class Utility
      * 
      * @param results
      *            the resulting {@link javax.sql.rowset.CachedRowSet} of a SQL query.
-     * @param parent
-     *            the parent instance of a {@link dml.team5.PLSQL2XMLConverter} object.
      * @return the {@link org.w3c.dom.Document}.
      * @throws ParserConfigurationException
      *             if a {@link javax.xml.parsers.DocumentBuilder} cannot be created which satisfies the configuration requested.
@@ -122,10 +120,10 @@ public final class Utility
      *             if an input/output error occurs.
      * @since 1.1
      */
-    public static final Document createDocument(CachedRowSet results, final PLSQL2XMLConverter parent) throws ParserConfigurationException, SQLException, SAXException, IOException
+    public static final Document createDocument(final CachedRowSet results) throws ParserConfigurationException, SQLException, SAXException, IOException
     {
         DocumentBuilder documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-        InputSource inputStream = new InputSource(new StringReader(Utility.writeXMLResults(results, parent)));
+        InputSource inputStream = new InputSource(new StringReader(Utility.writeXMLResults(results)));
         return documentBuilder.parse(inputStream);
     }
 
@@ -195,12 +193,12 @@ public final class Utility
         if ( isOracle )
         {
             // Oracle
-            return DriverManager.getConnection("jdbc:oracle:thin:@" + OracleServerSettings.SERVER() + ":" + OracleServerSettings.PORT() + ":" + OracleServerSettings.DATABASE(), OracleServerSettings.USERNAME(), OracleServerSettings.PASSWORD());
+            return DriverManager.getConnection("jdbc:oracle:thin:@" + ServerSettings.getServer() + ":" + ServerSettings.getPort() + ":" + ServerSettings.getDatabase(), ServerSettings.getUsername(), ServerSettings.getPassword());
         }
         else
         {
             // MySQL
-            return DriverManager.getConnection("jdbc:mysql://" + OracleServerSettings.SERVER() + "/" + OracleServerSettings.DATABASE() + "?zeroDateTimeBehavior=convertToNull&autoReconnect=true&characterEncoding=UTF-8&characterSetResults=UTF-8" + "&user=" + OracleServerSettings.USERNAME() + "&password=" + OracleServerSettings.PASSWORD());
+            return DriverManager.getConnection("jdbc:mysql://" + ServerSettings.getServer() + "/" + ServerSettings.getDatabase() + "?zeroDateTimeBehavior=convertToNull&autoReconnect=true&characterEncoding=UTF-8&characterSetResults=UTF-8" + "&user=" + ServerSettings.getUsername() + "&password=" + ServerSettings.getPassword());
         }
     }
 
@@ -309,15 +307,15 @@ public final class Utility
      * @param results
      *            the {@link javax.sql.rowset.CachedRowSet} resulting from executing a SQL query.
      * @param columnIndex
-     * @param parent
-     *            the parent instance of a {@link dml.team5.PLSQL2XMLConverter} object.
      * @return
      * @throws SQLException
      *             if a database access error occurs.
      * @since 1.1
      */
-    public static final String getTableName(final CachedRowSet results, final int columnIndex, final PLSQL2XMLConverter parent) throws SQLException
+    public static final String getTableName(final CachedRowSet results, final int columnIndex) throws SQLException
     {
+        // TODO: Improve this algorithm.
+        // Fails on query: "Select * From C, S"
         String tableName = "";
 
         for ( String table : Utility.TABLES )
@@ -349,14 +347,12 @@ public final class Utility
      * @param results
      *            the {@link javax.sql.rowset.CachedRowSet} resulting from executing a SQL query.
      * @param columnIndex
-     * @param parent
-     *            the parent instance of a {@link dml.team5.PLSQL2XMLConverter} object.
      * @return
      * @throws SQLException
      *             if a database access error occurs.
      * @since 1.1
      */
-    private static final SelectedElement getXMLStrings(final CachedRowSet results, final int columnIndex, final PLSQL2XMLConverter parent) throws SQLException
+    private static final SelectedElement getXMLStrings(final CachedRowSet results, final int columnIndex) throws SQLException
     {
         String tableName = "";
         String columnName = "";
@@ -373,11 +369,11 @@ public final class Utility
 
         if ( tableName.isEmpty() )
         {
-            tableName = Utility.getTableName(results, columnIndex, parent);
+            tableName = results.getMetaData().getTableName(columnIndex).trim();
 
             if ( tableName.isEmpty() )
             {
-                tableName = results.getMetaData().getTableName(columnIndex).trim();
+                tableName = Utility.getTableName(results, columnIndex);
             }
         }
 
@@ -448,7 +444,7 @@ public final class Utility
      * @param results
      *            the {@link javax.sql.rowset.CachedRowSet} resulting from executing a SQL query.
      * @param minimumFieldWidth
-     *            the minimum width of the field in characters.
+     *            the minimum width of a field in characters.
      * @return the table {@link java.lang.String}.
      * @throws SQLException
      *             if a database access error occurs.
@@ -466,7 +462,7 @@ public final class Utility
      * @param results
      *            the {@link javax.sql.rowset.CachedRowSet} resulting from executing a SQL query.
      * @param minimumFieldWidth
-     *            the minimum width of the field in characters.
+     *            the minimum width of a field in characters.
      * @param separatorCharacter
      *            the character used to construct the separator between the table header and the table body.
      * @return the table {@link java.lang.String}.
@@ -544,15 +540,17 @@ public final class Utility
      * 
      * @param results
      *            the {@link javax.sql.rowset.CachedRowSet} resulting from executing a SQL query.
-     * @param parent
-     *            the parent instance of a {@link dml.team5.PLSQL2XMLConverter} object.
      * @return the XML {@link java.lang.String}.
      * @throws SQLException
      *             if a database access error occurs.
      * @since 1.1
      */
-    public static final String writeXMLResults(final CachedRowSet results, final PLSQL2XMLConverter parent) throws SQLException
+    public static final String writeXMLResults(final CachedRowSet results) throws SQLException
     {
+        // TODO: DTD vs XSD
+        // TODO: Grouping
+        // TODO: Compression
+
         // Declare data structures.
         final ResultSetMetaData rsmd = results.getMetaData();
         final StringBuffer output = new StringBuffer();
@@ -576,7 +574,7 @@ public final class Utility
             for ( int i = 1; i <= rsmd.getColumnCount(); i++ )
             {
                 // Declare default strings.
-                SelectedElement xmlStrings = Utility.getXMLStrings(results, i, parent);
+                SelectedElement xmlStrings = Utility.getXMLStrings(results, i);
                 final Object VALUE = results.getObject(i);
 
                 // Write opening attribute tag.

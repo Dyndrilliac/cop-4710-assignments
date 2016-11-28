@@ -31,9 +31,11 @@ public abstract class LanguageConverter
     /**
      * Executes the conversion process: parses input, strips out SQL modifications, connects to database, executes input, and converts the output into XML.
      * 
+     * @throws Exception
+     *             if there is an error.
      * @since 1.0
      */
-    protected abstract void convert();
+    protected abstract void convert() throws Exception;
 
     /**
      * Returns the input {@link java.lang.String}.

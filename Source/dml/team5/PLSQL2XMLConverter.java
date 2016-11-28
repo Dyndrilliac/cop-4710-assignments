@@ -19,11 +19,6 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker;
  */
 public final class PLSQL2XMLConverter extends LanguageConverter
 {
-    /*
-     * Declare private static constants.
-     */
-    private static final boolean DEBUG = true;
-
     /**
      * Simple console-based command-line test driver. Each argument is an input {@link java.lang.String}.
      * 
@@ -33,7 +28,9 @@ public final class PLSQL2XMLConverter extends LanguageConverter
      */
     public static final void main(final String[] args)
     {
+        final boolean isDebugMode = false;
         final boolean isDTD = true;
+        final boolean isOracle = true;
 
         if ( args.length > 0 )
         {
@@ -49,7 +46,7 @@ public final class PLSQL2XMLConverter extends LanguageConverter
                 System.out.println("Input: " + args[i] + "\n");
 
                 // Print output.
-                System.out.println(new PLSQL2XMLConverter(args[i], isDTD));
+                System.out.println(new PLSQL2XMLConverter(args[i], isOracle, isDebugMode, isDTD));
             }
         }
         else
@@ -63,37 +60,59 @@ public final class PLSQL2XMLConverter extends LanguageConverter
     /*
      * Declare private instance variables.
      */
-    private boolean isDTD      = true;
-    private boolean isModified = false;
+    private boolean isDebugMode = false;
+    private boolean isDTD       = true;
+    private boolean isModified  = false;
+    private boolean isOracle    = false;
 
     /**
      * Constructs a new instance of {@link dml.team5.PLSQL2XMLConverter} based on an input {@link java.lang.String}.
      * 
      * @param inputString
      *            the input {@link java.lang.String}.
+     * @param isOracle
+     *            true to connect to an Oracle database, false to connect to a MySQL database.
+     * @param isDebugMode
+     *            true to print the SQL table in addition to the XML tags, false otherwise.
      * @param isDTD
      *            true to use the W3C Data Type Definition (DTD) format, false to use the W3C XML Schema Definition (XSD) format.
      * @since 1.0
      */
-    public PLSQL2XMLConverter(final String inputString, final boolean isDTD)
+    public PLSQL2XMLConverter(final String inputString, final boolean isOracle, final boolean isDebugMode, final boolean isDTD)
     {
         // Set the original input.
         super(inputString.trim());
 
+        // Set whether Oracle or MySQL.
+        this.setOracle(isOracle);
+
+        // Set whether debugging or not.
+        this.setDebugMode(isDebugMode);
+
         // Set whether DTD or XSD.
         this.setDTD(isDTD);
 
-        // Execute conversion process.
-        this.convert();
+        try
+        {
+            // Execute conversion process.
+            this.convert();
+        }
+        catch ( final Exception e )
+        {
+            // If error, hopefully set the output to a meaningful error.
+            this.setOutputString(e.toString() + "\n");
+        }
     }
 
     /**
      * Executes the conversion process: parses input, strips out SQL modifications, connects to database, executes input, and converts the output into XML.
      * 
+     * @throws Exception
+     *             if a database access error occurs, or if a parsing error occurs.
      * @since 1.0
      */
     @Override
-    protected final void convert()
+    protected final void convert() throws Exception
     {
         // Get the input.
         String input = this.getOriginalInput();
@@ -132,7 +151,7 @@ public final class PLSQL2XMLConverter extends LanguageConverter
             try
             {
                 // Connect to the Oracle database server.
-                connection = Utility.getConnection(false);
+                connection = Utility.getConnection(this.isOracle());
 
                 // Execute the input query.
                 results = Utility.executeSQLStatement(connection, input);
@@ -149,13 +168,13 @@ public final class PLSQL2XMLConverter extends LanguageConverter
                     if ( input.toLowerCase(Locale.ROOT).startsWith("select") )
                     {
                         // If debugging, print out the table too.
-                        if ( PLSQL2XMLConverter.DEBUG )
+                        if ( this.isDebugMode() )
                         {
                             System.out.println(Utility.writeSQLResults(results));
                         }
 
                         // Construct the output XML.
-                        this.setOutputString(Utility.writeXMLResults(results, this));
+                        this.setOutputString(Utility.writeXMLResults(results));
                     }
                 }
 
@@ -165,7 +184,7 @@ public final class PLSQL2XMLConverter extends LanguageConverter
             catch ( final SQLException sqle )
             {
                 // Failed to connect and execute the input query.
-                sqle.printStackTrace();
+                throw new Exception(sqle.toString());
             }
             finally
             {
@@ -176,7 +195,7 @@ public final class PLSQL2XMLConverter extends LanguageConverter
         catch ( final RecognitionException re )
         {
             // Failed to parse the input query.
-            re.printStackTrace();
+            throw new Exception(re.toString());
         }
         finally
         {
@@ -193,6 +212,18 @@ public final class PLSQL2XMLConverter extends LanguageConverter
     public final String getStrippedInput()
     {
         return Stripper.strip(this.getOriginalInput());
+    }
+
+    /**
+     * Return the value of the isDebugMode flag.
+     * True to print the SQL table in addition to the XML tags, false otherwise.
+     * 
+     * @return the value of the isDebugMode flag.
+     * @since 1.1
+     */
+    public final boolean isDebugMode()
+    {
+        return this.isDebugMode;
     }
 
     /**
@@ -220,6 +251,31 @@ public final class PLSQL2XMLConverter extends LanguageConverter
     }
 
     /**
+     * Return the value of the isOracle flag.
+     * True to connect to an Oracle database, false to connect to a MySQL database.
+     * 
+     * @return the value of the isOracle flag.
+     * @since 1.1
+     */
+    public final boolean isOracle()
+    {
+        return this.isOracle;
+    }
+
+    /**
+     * Allows the isDebugMode flag to be altered.
+     * True to print the SQL table in addition to the XML tags, false otherwise.
+     * 
+     * @param isDebugMode
+     *            the new value for the isDebugMode flag.
+     * @since 1.1
+     */
+    protected final void setDebugMode(final boolean isDebugMode)
+    {
+        this.isDebugMode = isDebugMode;
+    }
+
+    /**
      * Allows the isDTD flag to be altered.
      * True to use the W3C Data Type Definition (DTD) format, false to use the W3C XML Schema Definition (XSD) format.
      * 
@@ -243,5 +299,18 @@ public final class PLSQL2XMLConverter extends LanguageConverter
     protected final void setModified(final boolean isModified)
     {
         this.isModified = isModified;
+    }
+
+    /**
+     * Allows the isOracle flag to be altered.
+     * True to connect to an Oracle database, false to connect to a MySQL database.
+     * 
+     * @param isOracle
+     *            the new value for the isOracle flag.
+     * @since 1.1
+     */
+    protected final void setOracle(final boolean isOracle)
+    {
+        this.isOracle = isOracle;
     }
 }
