@@ -34,10 +34,12 @@ import dml.team5.antlr.PLSQLLexer;
 import dml.team5.antlr.PLSQLParser;
 
 /**
+ * <p>
+ * This helper class contains useful utility methods.
+ * </p>
+ * 
  * @author Matthew Boyette (N00868808@ospreys.unf.edu)
  * @version 1.1
- * 
- *          This helper class contains useful utility methods.
  */
 public final class Utility
 {
@@ -46,7 +48,9 @@ public final class Utility
     public static final List<String>                  TABLES            = new ArrayList<String>();
 
     /**
+     * <p>
      * Builds a mapping of the database's schema, matching column names to table names.
+     * </p>
      * 
      * @param connection
      *            the {@link java.sql.Connection} to the database server.
@@ -75,7 +79,9 @@ public final class Utility
     }
 
     /**
+     * <p>
      * Build a list of all the relevant table names in the database if the current list is empty.
+     * </p>
      * 
      * @param connection
      *            the {@link java.sql.Connection} to the database server.
@@ -105,7 +111,9 @@ public final class Utility
     }
 
     /**
+     * <p>
      * Creates an XML {@link org.w3c.dom.Document} using the DOM API from the resulting {@link javax.sql.rowset.CachedRowSet} of a SQL query.
+     * </p>
      * 
      * @param results
      *            the resulting {@link javax.sql.rowset.CachedRowSet} of a SQL query.
@@ -128,7 +136,9 @@ public final class Utility
     }
 
     /**
+     * <p>
      * Executes a SQL statement on the database server and returns the corresponding {@link javax.sql.rowset.CachedRowSet}.
+     * </p>
      * 
      * @param connection
      *            the {@link java.sql.Connection} to the database server.
@@ -158,9 +168,12 @@ public final class Utility
     }
 
     /**
+     * <p>
      * Executes a SQL statement on the database server and returns the corresponding {@link javax.sql.rowset.CachedRowSet}.
+     * </p>
      * 
      * @param pstatement
+     *            the {@link java.sql.PreparedStatement} to execute.
      * @return the corresponding {@link javax.sql.rowset.CachedRowSet}.
      * @throws SQLException
      *             if a database access error occurs, or the given SQL statement produces anything other than a single {@link javax.sql.rowset.CachedRowSet} object.
@@ -179,9 +192,12 @@ public final class Utility
     }
 
     /**
+     * <p>
      * Establishes a {@link java.sql.Connection} to the database server.
+     * </p>
      * 
      * @param isOracle
+     *            true to connect to an Oracle database, false to connect to a MySQL database.
      * @return the {@link java.sql.Connection} to the database server.
      * @throws SQLException
      *             if a database access error occurs.
@@ -203,7 +219,9 @@ public final class Utility
     }
 
     /**
+     * <p>
      * Lexically analyzes the input {@link java.lang.String} and returns the appropriate {@link org.antlr.v4.runtime.Parser}.
+     * </p>
      * 
      * @param inputString
      *            the input {@link java.lang.String}.
@@ -239,7 +257,9 @@ public final class Utility
     }
 
     /**
+     * <p>
      * Takes a {@link org.antlr.v4.runtime.Parser} and returns a {@link org.antlr.v4.runtime.tree.ParseTree}.
+     * </p>
      * 
      * @param parser
      *            the {@link org.antlr.v4.runtime.Parser}.
@@ -284,7 +304,9 @@ public final class Utility
     }
 
     /**
+     * <p>
      * Takes an input {@link java.lang.String} and returns a {@link org.antlr.v4.runtime.tree.ParseTree}.
+     * </p>
      * 
      * @param inputString
      *            the input {@link java.lang.String}.
@@ -304,55 +326,20 @@ public final class Utility
     }
 
     /**
+     * <p>
+     * Returns the {@link dml.team5.SelectedElement} for the given {@link javax.sql.rowset.CachedRowSet} and columnIndex.
+     * </p>
+     * 
      * @param results
      *            the {@link javax.sql.rowset.CachedRowSet} resulting from executing a SQL query.
      * @param columnIndex
-     * @return
+     *            the index of the column in the {@link javax.sql.rowset.CachedRowSet}.
+     * @return the {@link dml.team5.SelectedElement} for the given {@link javax.sql.rowset.CachedRowSet} and columnIndex.
      * @throws SQLException
      *             if a database access error occurs.
      * @since 1.1
      */
-    public static final String getTableName(final CachedRowSet results, final int columnIndex) throws SQLException
-    {
-        // TODO: Improve this algorithm.
-        // Fails on query: "Select * From C, S"
-        String tableName = "";
-
-        for ( String table : Utility.TABLES )
-        {
-            if ( tableName.isEmpty() )
-            {
-                List<String> columns = Utility.SCHEMA.get(table);
-                ResultSetMetaData rsmd = results.getMetaData();
-
-                for ( String column : columns )
-                {
-                    if ( column.equalsIgnoreCase(rsmd.getColumnName(columnIndex)) )
-                    {
-                        tableName = table;
-                        break;
-                    }
-                }
-            }
-            else
-            {
-                break;
-            }
-        }
-
-        return tableName;
-    }
-
-    /**
-     * @param results
-     *            the {@link javax.sql.rowset.CachedRowSet} resulting from executing a SQL query.
-     * @param columnIndex
-     * @return
-     * @throws SQLException
-     *             if a database access error occurs.
-     * @since 1.1
-     */
-    private static final SelectedElement getXMLStrings(final CachedRowSet results, final int columnIndex) throws SQLException
+    private static final SelectedElement getSelectedElement(final CachedRowSet results, final int columnIndex) throws SQLException
     {
         String tableName = "";
         String columnName = "";
@@ -391,7 +378,54 @@ public final class Utility
     }
 
     /**
+     * <p>
+     * Returns the table name {@link java.lang.String} associated with a particular {@link javax.sql.rowset.CachedRowSet} and columnIndex.
+     * </p>
+     * 
+     * @param results
+     *            the {@link javax.sql.rowset.CachedRowSet} resulting from executing a SQL query.
+     * @param columnIndex
+     *            the index of the column in the {@link javax.sql.rowset.CachedRowSet}.
+     * @return the table name {@link java.lang.String} associated with a particular {@link javax.sql.rowset.CachedRowSet} and columnIndex.
+     * @throws SQLException
+     *             if a database access error occurs.
+     * @since 1.1
+     */
+    public static final String getTableName(final CachedRowSet results, final int columnIndex) throws SQLException
+    {
+        // TODO: Improve this algorithm.
+        // Fails on query: "Select * From C, S"
+        String tableName = "";
+
+        for ( String table : Utility.TABLES )
+        {
+            if ( tableName.isEmpty() )
+            {
+                List<String> columns = Utility.SCHEMA.get(table);
+                ResultSetMetaData rsmd = results.getMetaData();
+
+                for ( String column : columns )
+                {
+                    if ( column.equalsIgnoreCase(rsmd.getColumnName(columnIndex)) )
+                    {
+                        tableName = table;
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                break;
+            }
+        }
+
+        return tableName;
+    }
+
+    /**
+     * <p>
      * Takes a string and pads it with whitespace to the left.
+     * </p>
      * 
      * @param s
      *            the {@link java.lang.String} to pad.
@@ -407,7 +441,9 @@ public final class Utility
     }
 
     /**
+     * <p>
      * Takes a string and pads it with whitespace to the right.
+     * </p>
      * 
      * @param s
      *            the {@link java.lang.String} to pad.
@@ -423,7 +459,9 @@ public final class Utility
     }
 
     /**
+     * <p>
      * Constructs a table {@link java.lang.String} from the results of a SQL query in the form of a {@link javax.sql.rowset.CachedRowSet} object.
+     * </p>
      * 
      * @param results
      *            the {@link javax.sql.rowset.CachedRowSet} resulting from executing a SQL query.
@@ -439,7 +477,9 @@ public final class Utility
     }
 
     /**
+     * <p>
      * Constructs a table {@link java.lang.String} from the results of a SQL query in the form of a {@link javax.sql.rowset.CachedRowSet} object.
+     * </p>
      * 
      * @param results
      *            the {@link javax.sql.rowset.CachedRowSet} resulting from executing a SQL query.
@@ -457,7 +497,9 @@ public final class Utility
     }
 
     /**
+     * <p>
      * Constructs a table {@link java.lang.String} from the results of a SQL query in the form of a {@link javax.sql.rowset.CachedRowSet} object.
+     * </p>
      * 
      * @param results
      *            the {@link javax.sql.rowset.CachedRowSet} resulting from executing a SQL query.
@@ -536,7 +578,9 @@ public final class Utility
     }
 
     /**
+     * <p>
      * Constructs an XML {@link java.lang.String} from the results of a SQL query in the form of a {@link javax.sql.rowset.CachedRowSet} object.
+     * </p>
      * 
      * @param results
      *            the {@link javax.sql.rowset.CachedRowSet} resulting from executing a SQL query.
@@ -547,7 +591,7 @@ public final class Utility
      */
     public static final String writeXMLResults(final CachedRowSet results) throws SQLException
     {
-        // TODO: DTD vs XSD
+        // TODO: DTD versus XSD
         // TODO: Grouping
         // TODO: Compression
 
@@ -574,7 +618,7 @@ public final class Utility
             for ( int i = 1; i <= rsmd.getColumnCount(); i++ )
             {
                 // Declare default strings.
-                SelectedElement xmlStrings = Utility.getXMLStrings(results, i);
+                SelectedElement xmlStrings = Utility.getSelectedElement(results, i);
                 final Object VALUE = results.getObject(i);
 
                 // Write opening attribute tag.

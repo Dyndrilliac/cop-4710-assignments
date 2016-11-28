@@ -2,10 +2,12 @@
 package dml.team5;
 
 /**
+ * <p>
+ * This abstract class provides the basic variables and methods necessary for converting from one language to another.
+ * </p>
+ * 
  * @author Matthew Boyette (N00868808@ospreys.unf.edu)
  * @version 1.1
- * 
- *          This abstract class provides the basic variables and methods necessary for converting from one language to another.
  */
 public abstract class LanguageConverter
 {
@@ -16,7 +18,9 @@ public abstract class LanguageConverter
     private String outputString  = "";
 
     /**
+     * <p>
      * Constructs a new instance of {@link dml.team5.LanguageConverter} based on an input {@link java.lang.String}.
+     * </p>
      * 
      * @param inputString
      *            the input {@link java.lang.String}.
@@ -29,7 +33,9 @@ public abstract class LanguageConverter
     }
 
     /**
-     * Executes the conversion process: parses input, strips out SQL modifications, connects to database, executes input, and converts the output into XML.
+     * <p>
+     * Executes the conversion process.
+     * </p>
      * 
      * @throws Exception
      *             if there is an error.
@@ -38,7 +44,9 @@ public abstract class LanguageConverter
     protected abstract void convert() throws Exception;
 
     /**
+     * <p>
      * Returns the input {@link java.lang.String}.
+     * </p>
      * 
      * @return the input {@link java.lang.String}.
      * @since 1.0
@@ -49,7 +57,9 @@ public abstract class LanguageConverter
     }
 
     /**
+     * <p>
      * Allows the input {@link java.lang.String} to be altered.
+     * </p>
      * 
      * @param originalInput
      *            the new input {@link java.lang.String}.
@@ -61,7 +71,9 @@ public abstract class LanguageConverter
     }
 
     /**
+     * <p>
      * Allows the output {@link java.lang.String} to be altered.
+     * </p>
      * 
      * @param outputString
      *            the new output {@link java.lang.String}.
@@ -73,7 +85,9 @@ public abstract class LanguageConverter
     }
 
     /**
+     * <p>
      * Return the output {@link java.lang.String}.
+     * </p>
      * 
      * @return the output {@link java.lang.String}.
      * @see java.lang.Object#toString()

@@ -10,17 +10,25 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
 /**
+ * <p>
+ * This class converts the relational database output of both unmodified and modified Oracle PL/SQL selection statements into XML.
+ * </p>
+ * <p>
+ * Command-line usage: <code>{@link dml.team5.PLSQL2XMLConverter} InputString1 InputString2 ... InputStringN</code>
+ * </p>
+ * <p>
+ * Remember to enclose strings containing whitespace with double-quotes!
+ * </p>
+ * 
  * @author Matthew Boyette (N00868808@ospreys.unf.edu)
  * @version 1.1
- * 
- *          This class converts the relational database output of both unmodified and modified Oracle PL/SQL selection statements into XML.
- * 
- *          Command-line usage: {@link dml.team5.PLSQL2XMLConverter} InputString1 InputString2 ... InputStringN
  */
 public final class PLSQL2XMLConverter extends LanguageConverter
 {
     /**
+     * <p>
      * Simple console-based command-line test driver. Each argument is an input {@link java.lang.String}.
+     * </p>
      * 
      * @param args
      *            the array of command-line arguments.
@@ -53,7 +61,7 @@ public final class PLSQL2XMLConverter extends LanguageConverter
         {
             // If no input is given, show the user how to invoke the program.
             System.out.println("Usage: " + args[0] + " InputString1 InputString2 ... InputStringN");
-            System.out.println("Remember to enclose strings containing whitepace with double-quotes!");
+            System.out.println("Remember to enclose strings containing whitespace with double-quotes!");
         }
     }
 
@@ -66,7 +74,9 @@ public final class PLSQL2XMLConverter extends LanguageConverter
     private boolean isOracle    = false;
 
     /**
+     * <p>
      * Constructs a new instance of {@link dml.team5.PLSQL2XMLConverter} based on an input {@link java.lang.String}.
+     * </p>
      * 
      * @param inputString
      *            the input {@link java.lang.String}.
@@ -99,13 +109,15 @@ public final class PLSQL2XMLConverter extends LanguageConverter
         }
         catch ( final Exception e )
         {
-            // If error, hopefully set the output to a meaningful error.
+            // If there is an error, then set the output to a meaningful error message of some kind.
             this.setOutputString(e.toString() + "\n");
         }
     }
 
     /**
+     * <p>
      * Executes the conversion process: parses input, strips out SQL modifications, connects to database, executes input, and converts the output into XML.
+     * </p>
      * 
      * @throws Exception
      *             if a database access error occurs, or if a parsing error occurs.
@@ -204,7 +216,9 @@ public final class PLSQL2XMLConverter extends LanguageConverter
     }
 
     /**
+     * <p>
      * Returns the stripped input {@link java.lang.String}.
+     * </p>
      * 
      * @return the stripped input {@link java.lang.String}.
      * @since 1.1
@@ -215,8 +229,12 @@ public final class PLSQL2XMLConverter extends LanguageConverter
     }
 
     /**
+     * <p>
      * Return the value of the isDebugMode flag.
+     * </p>
+     * <p>
      * True to print the SQL table in addition to the XML tags, false otherwise.
+     * </p>
      * 
      * @return the value of the isDebugMode flag.
      * @since 1.1
@@ -227,8 +245,12 @@ public final class PLSQL2XMLConverter extends LanguageConverter
     }
 
     /**
+     * <p>
      * Return the value of the isDTD flag.
+     * </p>
+     * <p>
      * True to use the W3C Data Type Definition (DTD) format, false to use the W3C XML Schema Definition (XSD) format.
+     * </p>
      * 
      * @return the value of the isDTD flag.
      * @since 1.1
@@ -239,8 +261,12 @@ public final class PLSQL2XMLConverter extends LanguageConverter
     }
 
     /**
+     * <p>
      * Return the value of the isModified flag.
+     * </p>
+     * <p>
      * True to use the {@link dml.team5.antlr.ModifiedPLSQLParser}, false to use the {@link dml.team5.antlr.PLSQLParser}.
+     * </p>
      * 
      * @return the value of the isModified flag.
      * @since 1.1
@@ -251,8 +277,12 @@ public final class PLSQL2XMLConverter extends LanguageConverter
     }
 
     /**
+     * <p>
      * Return the value of the isOracle flag.
+     * </p>
+     * <p>
      * True to connect to an Oracle database, false to connect to a MySQL database.
+     * </p>
      * 
      * @return the value of the isOracle flag.
      * @since 1.1
@@ -263,8 +293,12 @@ public final class PLSQL2XMLConverter extends LanguageConverter
     }
 
     /**
+     * <p>
      * Allows the isDebugMode flag to be altered.
+     * </p>
+     * <p>
      * True to print the SQL table in addition to the XML tags, false otherwise.
+     * </p>
      * 
      * @param isDebugMode
      *            the new value for the isDebugMode flag.
@@ -276,8 +310,12 @@ public final class PLSQL2XMLConverter extends LanguageConverter
     }
 
     /**
+     * <p>
      * Allows the isDTD flag to be altered.
+     * </p>
+     * <p>
      * True to use the W3C Data Type Definition (DTD) format, false to use the W3C XML Schema Definition (XSD) format.
+     * </p>
      * 
      * @param isDTD
      *            the new value for the isDTD flag.
@@ -289,8 +327,12 @@ public final class PLSQL2XMLConverter extends LanguageConverter
     }
 
     /**
+     * <p>
      * Allows the isModified flag to be altered.
+     * </p>
+     * <p>
      * True to use the {@link dml.team5.antlr.ModifiedPLSQLParser}, false to use the {@link dml.team5.antlr.PLSQLParser}.
+     * </p>
      * 
      * @param isModified
      *            the new value for the isModified flag.
@@ -302,8 +344,12 @@ public final class PLSQL2XMLConverter extends LanguageConverter
     }
 
     /**
+     * <p>
      * Allows the isOracle flag to be altered.
+     * </p>
+     * <p>
      * True to connect to an Oracle database, false to connect to a MySQL database.
+     * </p>
      * 
      * @param isOracle
      *            the new value for the isOracle flag.

@@ -4,10 +4,12 @@ package dml.team5;
 import java.util.Locale;
 
 /**
+ * <p>
+ * This helper class is a simple data structure to store information about selected elements.
+ * </p>
+ * 
  * @author Matthew Boyette (N00868808@ospreys.unf.edu)
  * @version 1.1
- * 
- *          This helper class is a simple data structure to store information about selected elements.
  */
 public class SelectedElement
 {
@@ -16,10 +18,14 @@ public class SelectedElement
     public final String tableName;
 
     /**
+     * <p>
      * Constructs an instance of {@link dml.team5.SelectedElement}.
+     * </p>
      * 
      * @param tableName
+     *            the table name {@link java.lang.String}.
      * @param columnName
+     *            the column name {@link java.lang.String}.
      * @since 1.1
      */
     public SelectedElement(final String tableName, final String columnName)
@@ -28,11 +34,16 @@ public class SelectedElement
     }
 
     /**
+     * <p>
      * Constructs an instance of {@link dml.team5.SelectedElement}.
+     * </p>
      * 
      * @param tableName
+     *            the table name {@link java.lang.String}.
      * @param columnName
+     *            the column name {@link java.lang.String}.
      * @param columnLabel
+     *            the column label {@link java.lang.String}.
      * @since 1.1
      */
     public SelectedElement(final String tableName, final String columnName, final String columnLabel)
@@ -43,8 +54,13 @@ public class SelectedElement
     }
 
     /**
+     * <p>
+     * Tests this object for equality with another object.
+     * </p>
+     * 
      * @param obj
-     * @return
+     *            the object with which to compare.
+     * @return true for equality, false for inequality.
      * @see java.lang.Object#equals(java.lang.Object)
      * @since 1.1
      */
@@ -79,7 +95,11 @@ public class SelectedElement
     }
 
     /**
-     * @return
+     * <p>
+     * Returns this object's hash code.
+     * </p>
+     * 
+     * @return this object's hash code.
      * @see java.lang.Object#hashCode()
      * @since 1.1
      */

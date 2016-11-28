@@ -2,18 +2,23 @@
 package dml.team5;
 
 /**
+ * <p>
+ * This class provides a method to strip out the modifications to the syntax for the SELECT query.
+ * </p>
+ * 
  * @author Merrillee Palmer (N00449190@ospreys.unf.edu)
  * @version 1.1
- * 
- *          This class provides a method to strip out the modifications to the syntax for the SELECT query.
  */
 public class Stripper
 {
     public static String[][] changesArray;
-    private static String    output;
+    public static String     input;
+    public static String     output;
 
     /**
+     * <p>
      * This method takes an input {@link java.lang.String}, strips out our SQL modifications, and then returns the stripped {@link java.lang.String} as output.
+     * </p>
      * 
      * @param input
      *            the input {@link java.lang.String}.
@@ -22,6 +27,7 @@ public class Stripper
      */
     public static final String strip(final String input)
     {
+        Stripper.input = input;
         Stripper.output = "";
         Stripper.changesArray = new String[100][4];
         int changesIndex = 0;

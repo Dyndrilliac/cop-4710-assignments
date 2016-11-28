@@ -5,17 +5,21 @@ import java.util.Locale;
 import java.util.Scanner;
 
 /**
+ * <p>
+ * This class contains a more sophisticated console driver to interact with the user and control the program.
+ * </p>
+ * 
  * @author Merrillee Palmer (N00449190@ospreys.unf.edu)
  * @author Matthew Boyette (N00868808@ospreys.unf.edu)
  * @version 1.1
- * 
- *          This class contains a more sophisticated console driver to interact with the user and control the program.
  */
 public class SQLTerminal
 {
 
     /**
+     * <p>
      * Sophisticated console-based driver which interacts with the user and controls the program.
+     * </p>
      * 
      * @param args
      *            the array of command-line arguments.
@@ -169,7 +173,7 @@ public class SQLTerminal
                                                         break;
 
                                                     default:
-                                                        System.out.println("Setup error: unrecognized variable.\n");
+                                                        System.out.println("Setup error: unrecognized property.\n");
                                                         break;
                                                 }
                                             }
