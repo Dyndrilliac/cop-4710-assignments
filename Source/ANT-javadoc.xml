@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <project default="javadoc">
     <target name="javadoc">
-        <javadoc access="private" author="true" classpath="JAR Files/Oracle-JDBC-7.jar;JAR Files/antlr-4.5.3-complete.jar" destdir="C:\Users\n0086\OneDrive\Documents\GitHub\cop-4710-assignments\Documentation\Javadoc" doctitle="COP 4710 Assignments Documentation" nodeprecated="false" nodeprecatedlist="false" noindex="false" nonavbar="false" notree="false" packagenames="dml.team5.antlr,dml.team5" source="1.8" sourcepath="." splitindex="true" use="true" version="true"/>
+        <javadoc access="private" author="true" classpath="JAR Files/Oracle-JDBC-7.jar;JAR Files/antlr-4.5.3-complete.jar;JAR Files/MYSQL-JDBC-5.1.40.jar" destdir="C:\Users\n0086\OneDrive\Documents\GitHub\cop-4710-assignments\Documentation\Javadoc API Reference" doctitle="COP 4710 Assignments Documentation" nodeprecated="false" nodeprecatedlist="false" noindex="false" nonavbar="false" notree="false" packagenames="dml.team5.antlr,dml.team5" source="1.8" sourcepath="." splitindex="true" use="true" version="true">
+            <link href="https://docs.oracle.com/javase/8/docs/api/"/>
+            <link href="http://docs.oracle.com/javase/8/javafx/api/"/>
+        </javadoc>
     </target>
 </project>
