@@ -174,10 +174,12 @@ class stripper{
 						i--;
 					}
 				}else if(Character.isLowerCase(currentChar)|| currentChar == '.' 
-						|| currentChar == '_'){
+						|| currentChar == '_' || Character.isDigit(currentChar)
+						|| currentChar == '$' || currentChar == '#'){
 					if(asMarker){
 						while (Character.isLowerCase(currentChar) || currentChar == '.' 
-								|| currentChar == '_'){
+								|| currentChar == '_' || Character.isDigit(currentChar)
+								|| currentChar == '$' || currentChar == '#'){
 							current = current + currentChar;
 							i++;
 							currentChar = input.charAt(i);
@@ -189,7 +191,8 @@ class stripper{
 						i--;
 					}else if(groupIdNeed){
 						while (Character.isLowerCase(currentChar) || currentChar == '.' 
-								|| currentChar == '_'){
+								|| currentChar == '_' || Character.isDigit(currentChar)
+								|| currentChar == '$' || currentChar == '#'){
 							current = current + currentChar;
 							i++;
 							currentChar = input.charAt(i);
@@ -205,7 +208,8 @@ class stripper{
 						i--;
 					}else if(compressMarker){
 						while (Character.isLowerCase(currentChar) || currentChar == '.' 
-								|| currentChar == '_' || Character.isDigit(currentChar)){
+								|| currentChar == '_' || Character.isDigit(currentChar)
+								|| currentChar == '$' || currentChar == '#'){
 							current = current + currentChar;
 							i++;
 							currentChar = input.charAt(i);
