@@ -199,8 +199,7 @@ public final class PLSQL2XMLConverter extends LanguageConverter {
 				}
 			} catch (final SQLException sqle) {
 				// Failed to connect and execute the input query.
-				// throw new Exception(sqle.toString());
-				sqle.printStackTrace();
+				throw new Exception(sqle.toString());
 			} finally {
 				connection = null;
 				// results = null;
