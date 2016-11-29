@@ -66,15 +66,30 @@ public final class Utility
         for ( String table : Utility.TABLES )
         {
             final List<String> columns = new ArrayList<String>();
-            final CachedRowSet results = Utility.executeSQLStatement(connection, "Describe " + table);
+            CachedRowSet results = null;
 
-            while ( results.next() )
+            try
             {
-                columns.add(results.getString(1));
+                results = Utility.executeSQLStatement(connection, "Describe " + table);
+            }
+            catch ( final Exception e )
+            {
+                final String query = "Select DISTINCT COLUMN_NAME From USER_TAB_COLUMNS Where TABLE_NAME = '?'";
+                final PreparedStatement pstatement = connection.prepareStatement(query);
+                pstatement.setString(1, table);
+                results = Utility.executeSQLStatement(pstatement);
             }
 
-            Utility.SCHEMA.put(table, columns);
-            results.close();
+            if ( results != null )
+            {
+                while ( results.next() )
+                {
+                    columns.add(results.getString(1));
+                }
+
+                Utility.SCHEMA.put(table, columns);
+                results.close();
+            }
         }
     }
 
@@ -93,7 +108,7 @@ public final class Utility
     {
         if ( Utility.TABLES.isEmpty() )
         {
-            final String query = "Select TABLE_NAME From INFORMATION_SCHEMA.TABLES Where TABLE_SCHEMA = '?' Order By TABLE_NAME Asc";
+            final String query = "Select DISTINCT TABLE_NAME From INFORMATION_SCHEMA.TABLES Where TABLE_SCHEMA = '?' Order By TABLE_NAME Asc";
             final PreparedStatement pstatement = connection.prepareStatement(query);
 
             pstatement.setString(1, ServerSettings.getDatabase());
@@ -600,7 +615,11 @@ public final class Utility
         final StringBuffer output = new StringBuffer();
 
         // Declare default strings.
-        String versionString = "1.0", rootTag = "ThisQuery", rowTag = "A_Record";
+        String versionString = "1.0", rootTag = "ThisQuery", rowTag = "A_Record", columnLabel = "";
+
+        // Declare row counter.
+        @SuppressWarnings("unused")
+        int rowNum = 0;
 
         // Write header.
         output.append("<?xml version=\"" + versionString + "\"?>\n");
@@ -611,18 +630,24 @@ public final class Utility
         // Loop through rows.
         while ( results.next() )
         {
+            // Increment row counter.
+            rowNum++;
+
             // Write opening record tag.
             output.append("\t<" + rowTag + ">\n");
 
             // Loop through columns.
             for ( int i = 1; i <= rsmd.getColumnCount(); i++ )
             {
-                // Declare default strings.
-                SelectedElement xmlStrings = Utility.getSelectedElement(results, i);
+                // Declare constants.
+                final SelectedElement xmlStrings = Utility.getSelectedElement(results, i);
                 final Object VALUE = results.getObject(i);
 
+                // Figure out column label.
+                columnLabel = xmlStrings.columnLabel;
+
                 // Write opening attribute tag.
-                output.append("\t\t<" + xmlStrings.columnLabel + " table=\"" + xmlStrings.tableName + "\" name=\"" + xmlStrings.columnName + "\">");
+                output.append("\t\t<" + columnLabel + " table=\"" + xmlStrings.tableName + "\" name=\"" + xmlStrings.columnName + "\">");
 
                 if ( VALUE != null )
                 {
@@ -631,7 +656,7 @@ public final class Utility
                 }
 
                 // Write closing attribute tag.
-                output.append("</" + xmlStrings.columnLabel + ">\n");
+                output.append("</" + columnLabel + ">\n");
             }
 
             // Write closing record tag.

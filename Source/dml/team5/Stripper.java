@@ -42,7 +42,7 @@ public class Stripper
 
         while ( true )
         {
-            String lc_input = input.toLowerCase();
+            String lc_input = input;//.toLowerCase();
 
             for ( int i = 0; i < lc_input.length(); i++ )
             {

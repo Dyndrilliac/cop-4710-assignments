@@ -150,7 +150,7 @@ public final class PLSQL2XMLConverter extends LanguageConverter
                     this.setModified(true);
 
                     // Try to parse the input query as modified PL/SQL.
-                    parseTree = Utility.getParseTree(input, this.isModified(), false);
+                    parseTree = Utility.getParseTree(input, this.isModified(), true);
 
                     // If the input query is modified PL/SQL and a SELECT query, then strip out the modifications and make it unmodified PL/SQL again.
                     input = this.getStrippedInput();
@@ -175,7 +175,7 @@ public final class PLSQL2XMLConverter extends LanguageConverter
                 results = Utility.executeSQLStatement(connection, input);
 
                 // Make a mapping of the database's schema, matching column names to table names.
-                Utility.buildSchemaMap(connection);
+                //Utility.buildSchemaMap(connection);
 
                 // Try to close the connection.
                 connection.close();
@@ -202,7 +202,8 @@ public final class PLSQL2XMLConverter extends LanguageConverter
             catch ( final SQLException sqle )
             {
                 // Failed to connect and execute the input query.
-                throw new Exception(sqle.toString());
+                //throw new Exception(sqle.toString());
+                sqle.printStackTrace();
             }
             finally
             {
