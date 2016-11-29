@@ -63,7 +63,7 @@ public final class Utility
             {
                 results = Utility.executeSQLStatement(connection, "Describe " + table);
             }
-            catch ( final Exception e )
+            catch ( final SQLException e )
             {
                 // TODO: Need a work-around for Oracle sucking here.
             }
@@ -351,25 +351,28 @@ public final class Utility
          */
         String tableName = "";
 
-        for ( String table : Utility.TABLES )
+        if ( !Utility.SCHEMA.isEmpty() )
         {
-            if ( tableName.isEmpty() )
+            for ( String table : Utility.TABLES )
             {
-                List<String> columns = Utility.SCHEMA.get(table);
-                ResultSetMetaData rsmd = results.getMetaData();
-
-                for ( String column : columns )
+                if ( tableName.isEmpty() )
                 {
-                    if ( column.equalsIgnoreCase(rsmd.getColumnName(columnIndex)) )
+                    List<String> columns = Utility.SCHEMA.get(table);
+                    ResultSetMetaData rsmd = results.getMetaData();
+
+                    for ( String column : columns )
                     {
-                        tableName = table;
-                        break;
+                        if ( column.equalsIgnoreCase(rsmd.getColumnName(columnIndex)) )
+                        {
+                            tableName = table;
+                            break;
+                        }
                     }
                 }
-            }
-            else
-            {
-                break;
+                else
+                {
+                    break;
+                }
             }
         }
 
