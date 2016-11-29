@@ -204,7 +204,7 @@ public final class PLSQL2XMLConverter extends LanguageConverter
             catch ( final SQLException sqle )
             {
                 // Failed to connect and execute the input query.
-                throw new Exception(sqle.toString());
+                throw new Exception(sqle.getLocalizedMessage());
             }
             finally
             {
@@ -215,7 +215,7 @@ public final class PLSQL2XMLConverter extends LanguageConverter
         catch ( final RecognitionException re )
         {
             // Failed to parse the input query.
-            throw new Exception(re.toString());
+            throw new Exception(re.getLocalizedMessage());
         }
         finally
         {

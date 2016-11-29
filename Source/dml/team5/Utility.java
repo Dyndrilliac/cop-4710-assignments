@@ -10,7 +10,10 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import javax.sql.rowset.CachedRowSet;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.BailErrorStrategy;
@@ -36,9 +39,10 @@ import dml.team5.antlr.PLSQLParser;
  */
 public final class Utility
 {
-    public static final HashMap<String, List<String>> SCHEMA            = new HashMap<String, List<String>>();
-    public static final List<SelectedElement>         SELECTED_ELEMENTS = new ArrayList<SelectedElement>();
-    public static final List<String>                  TABLES            = new ArrayList<String>();
+    public static final Map<String, Set<String>> SCHEMA            = new HashMap<String, Set<String>>();
+    public static boolean                        seenColumn        = false;
+    public static final List<SelectedElement>    SELECTED_ELEMENTS = new ArrayList<SelectedElement>();
+    public static final Set<String>              TABLES            = new HashSet<String>();
 
     /**
      * <p>
@@ -58,7 +62,7 @@ public final class Utility
         for ( String table : Utility.TABLES )
         {
             // Declare data structures.
-            final List<String> columnList = new ArrayList<String>();
+            final Set<String> columnSet = new HashSet<String>();
             final DatabaseMetaData dbmd = connection.getMetaData();
             CachedRowSet results = null;
 
@@ -86,7 +90,7 @@ public final class Utility
 
                         for ( int i = 1; i <= rsmd.getColumnCount(); i++ )
                         {
-                            columnList.add(rsmd.getColumnName(i));
+                            columnSet.add(rsmd.getColumnName(i));
                         }
                     }
                 }
@@ -96,11 +100,11 @@ public final class Utility
 
                     while ( results.next() )
                     {
-                        columnList.add(results.getString(4));
+                        columnSet.add(results.getString(4));
                     }
                 }
 
-                Utility.SCHEMA.put(table, columnList);
+                Utility.SCHEMA.put(table, columnSet);
                 results.close();
             }
         }
@@ -374,38 +378,20 @@ public final class Utility
      */
     public static final String getTableName(final CachedRowSet results, final int columnIndex) throws SQLException
     {
-        /*
-         * TODO: Improve this algorithm!
-         * 
-         * Sequentially searches the column list for each table and returns the table name if it finds a column with the same name as the current column.
-         * 
-         * Example Fail Query: "Select * From C, S"
-         * C and S both have the City attribute. When I execute a "SELECT * FROM C, S" then I don't know which City column goes with C and which one goes with S.
-         */
+        // TODO: Improve algorithm.
+        // Fails if selected items are not fully qualified and the FROM clause contains multiple tables with identically named attributes.
+        // Example query: Select * From JAG.Cust, JAG.S;
         String tableName = "";
 
         if ( !Utility.SCHEMA.isEmpty() )
         {
             for ( String table : Utility.TABLES )
             {
-                if ( tableName.isEmpty() )
-                {
-                    List<String> columns = Utility.SCHEMA.get(table);
-                    ResultSetMetaData rsmd = results.getMetaData();
+                Set<String> columns = Utility.SCHEMA.get(table);
+                ResultSetMetaData rsmd = results.getMetaData();
+                String columnName = rsmd.getColumnName(columnIndex);
 
-                    for ( String column : columns )
-                    {
-                        if ( column.equalsIgnoreCase(rsmd.getColumnName(columnIndex)) )
-                        {
-                            tableName = table;
-                            break;
-                        }
-                    }
-                }
-                else
-                {
-                    break;
-                }
+                if ( columns.contains(columnName) ) { return table; }
             }
         }
 
