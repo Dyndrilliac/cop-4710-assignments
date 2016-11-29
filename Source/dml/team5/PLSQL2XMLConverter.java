@@ -209,7 +209,7 @@ public final class PLSQL2XMLConverter extends LanguageConverter
             finally
             {
                 connection = null;
-                // results = null;
+                results = null;
             }
         }
         catch ( final RecognitionException re )

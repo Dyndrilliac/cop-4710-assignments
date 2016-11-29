@@ -2,6 +2,7 @@
 package dml.team5;
 
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSetMetaData;
@@ -56,26 +57,50 @@ public final class Utility
 
         for ( String table : Utility.TABLES )
         {
-            final List<String> columns = new ArrayList<String>();
+            // Declare data structures.
+            final List<String> columnList = new ArrayList<String>();
+            final DatabaseMetaData dbmd = connection.getMetaData();
             CachedRowSet results = null;
 
             try
             {
                 results = Utility.executeSQLStatement(connection, "Describe " + table);
+
             }
-            catch ( final SQLException e )
+            catch ( final SQLException sqle )
             {
-                // TODO: Need a work-around for Oracle sucking here.
+                results = new CachedRowSetImpl();
+                results.populate(dbmd.getColumns(null, null, table, null));
             }
 
             if ( results != null )
             {
-                while ( results.next() )
+                if ( !results.next() )
                 {
-                    columns.add(results.getString(1));
+                    results = Utility.executeSQLStatement(connection, "Select * From " + table);
+                    results.beforeFirst();
+
+                    if ( results.next() )
+                    {
+                        ResultSetMetaData rsmd = results.getMetaData();
+
+                        for ( int i = 1; i <= rsmd.getColumnCount(); i++ )
+                        {
+                            columnList.add(rsmd.getColumnName(i));
+                        }
+                    }
+                }
+                else
+                {
+                    results.beforeFirst();
+
+                    while ( results.next() )
+                    {
+                        columnList.add(results.getString(4));
+                    }
                 }
 
-                Utility.SCHEMA.put(table, columns);
+                Utility.SCHEMA.put(table, columnList);
                 results.close();
             }
         }
@@ -151,17 +176,25 @@ public final class Utility
      */
     public static final Connection getConnection(final boolean isOracle) throws SQLException
     {
+        Connection connection = null;
+
         // Return the connection.
         if ( isOracle )
         {
             // Oracle
-            return DriverManager.getConnection("jdbc:oracle:thin:@" + ServerSettings.getServer() + ":" + ServerSettings.getPort() + ":" + ServerSettings.getDatabase(), ServerSettings.getUsername(), ServerSettings.getPassword());
+            connection = DriverManager.getConnection("jdbc:oracle:thin:@" + ServerSettings.getServer() + ":" + ServerSettings.getPort() + ":" + ServerSettings.getDatabase(), ServerSettings.getUsername(), ServerSettings.getPassword());
+
+            // Needed for DatabaseMetaData.getColumns() to work.
+            ( (oracle.jdbc.driver.OracleConnection) connection ).setIncludeSynonyms(true);
         }
         else
         {
             // MySQL
-            return DriverManager.getConnection("jdbc:mysql://" + ServerSettings.getServer() + "/" + ServerSettings.getDatabase() + "?zeroDateTimeBehavior=convertToNull&autoReconnect=true&characterEncoding=UTF-8&characterSetResults=UTF-8" + "&user=" + ServerSettings.getUsername() + "&password=" + ServerSettings.getPassword());
+            connection = DriverManager.getConnection("jdbc:mysql://" + ServerSettings.getServer() + "/" + ServerSettings.getDatabase() + "?zeroDateTimeBehavior=convertToNull&autoReconnect=true&characterEncoding=UTF-8&characterSetResults=UTF-8" + "&user=" + ServerSettings.getUsername() + "&password=" + ServerSettings.getPassword());
         }
+
+        // Return the connection.
+        return connection;
     }
 
     /**
