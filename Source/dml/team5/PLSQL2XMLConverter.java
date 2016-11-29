@@ -152,7 +152,7 @@ public final class PLSQL2XMLConverter extends LanguageConverter
                     this.setModified(true);
 
                     // Try to parse the input query as modified PL/SQL.
-                    parseTree = Utility.getParseTree(input, this.isModified(), true);
+                    parseTree = Utility.getParseTree(input, this.isModified(), false);
 
                     // If the input query is modified PL/SQL and a SELECT query, then strip out the modifications and make it unmodified PL/SQL again.
                     input = this.getStrippedInput();
