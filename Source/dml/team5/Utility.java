@@ -582,6 +582,46 @@ public final class Utility
         @SuppressWarnings("unused")
         int rowNum = 0;
 
+        // In Utility.java
+        // This coded is implemented before the other xml is printed it printes dtd then xsd based on column labels
+        // DTD file Eric Gurvitz
+        System.out.println("DTD File");
+        System.out.println("<!DOCTYPE A_Record\n[");
+        System.out.print("<!ELEMENT A_Record ( ");
+        for ( int j = 1; j <= rsmd.getColumnCount(); j++ )
+        {
+            final SelectedElement xml_ST = Utility.getSelectedElement(results, j);
+            if ( rsmd.getColumnCount() == j ) // last column print then break
+            {
+                System.out.print(xml_ST.columnLabel + " ");
+                break;
+            }
+            System.out.print(xml_ST.columnLabel + ", "); // otherwise comma needed
+        }
+        System.out.println(")>");
+        for ( int j = 1; j <= rsmd.getColumnCount(); j++ )
+        {
+            final SelectedElement xml_ST = Utility.getSelectedElement(results, j);
+            System.out.println("<!ELEMENT " + xml_ST.columnLabel + " (#PCDATA)>");
+        }
+        System.out.println("]>");
+        System.out.println("End DTD File");
+        // Begin XSD File Eric Gurvitz
+        System.out.println("XSD File");
+        System.out.println("<xs:element name=\"A_Record\">");
+        System.out.println("<xs:complexType>");
+        System.out.println("\t<xs:sequence>");
+        for ( int j = 1; j <= rsmd.getColumnCount(); j++ )
+        {
+            final SelectedElement xml_ST = Utility.getSelectedElement(results, j);
+            System.out.print("\t\t");
+            System.out.println("<xs:elemement name=\"" + xml_ST.columnLabel + "\" type=\"" + rsmd.getColumnDisplaySize(j) + "\"/>");
+        }
+        System.out.println("\t</xs:sequence");
+        System.out.println("</xs:complexType>");
+        System.out.println("</xs:element>");
+        System.out.println("End XSD File");
+
         // Write header.
         output.append("<?xml version=\"" + versionString + "\"?>\n");
 
