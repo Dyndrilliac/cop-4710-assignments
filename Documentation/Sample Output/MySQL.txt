@@ -3,14 +3,16 @@ Welcome to the SQL2XML program!
 You may enter any valid SQL command below. Terminate input with a semicolon.
 For a list of special commands, type help. To exit the program, type exit.
 
+$sql2xml> help;
+
+	help:	display this help menu.
+	exit:	exit the program.
+	setup:	configure custom program settings.
+
+You may enter any valid SQL command below. Terminate input with a semicolon.
+For a list of special commands, type help. To exit the program, type exit.
+
 $sql2xml> setup;
-
-Setup mode engaged. Terminate input with a semicolon.
-For a list of properties and their current values, type get.
-To change a property's value, type set <propertyName> <newValue>.
-To exit setup mode and return to normal execution, type exit.
-
-$setup> set serverString www.mythicdigitalizations.com;
 
 Setup mode engaged. Terminate input with a semicolon.
 For a list of properties and their current values, type get.
@@ -24,400 +26,35 @@ For a list of properties and their current values, type get.
 To change a property's value, type set <propertyName> <newValue>.
 To exit setup mode and return to normal execution, type exit.
 
+$setup> set serverString www.mythicdigitalizations.com;
+
+Setup mode engaged. Terminate input with a semicolon.
+For a list of properties and their current values, type get.
+To change a property's value, type set <propertyName> <newValue>.
+To exit setup mode and return to normal execution, type exit.
+
+$setup> get;
+
+	databaseString	- dworcl                         - the name of the database with which to connect.
+	passwordString	- ravenpuff                      - the password that corresponds to the provided username.
+	portString	- 1521                           - the port on which the database server is listening for connections.
+	serverString	- www.mythicdigitalizations.com  - the domain or IP address belonging to the database server.
+	usernameString	- dworcl                         - the name which uniquely identifies each user account.
+	isOracle	- false                          - true to connect to an Oracle database, false to connect to a MySQL database.
+	isDebugMode	- false                          - true to print the SQL table in addition to the XML tags, false otherwise.
+	isDTD		- true                           - true to use the W3C Data Type Definition (DTD) format, false to use the W3C XML Schema Definition (XSD) format.
+
+Setup mode engaged. Terminate input with a semicolon.
+For a list of properties and their current values, type get.
+To change a property's value, type set <propertyName> <newValue>.
+To exit setup mode and return to normal execution, type exit.
+
 $setup> exit;
 
 You may enter any valid SQL command below. Terminate input with a semicolon.
 For a list of special commands, type help. To exit the program, type exit.
 
-$sql2xml> Select S.SNO, S.CITY From S;
-
-<?xml version="1.0"?>
-<ThisQuery>
-	<A_Record>
-		<SNO table="S" name="SNO">S1</SNO>
-		<CITY table="S" name="CITY">Dallas</CITY>
-	</A_Record>
-	<A_Record>
-		<SNO table="S" name="SNO">S2</SNO>
-		<CITY table="S" name="CITY">Chicago</CITY>
-	</A_Record>
-	<A_Record>
-		<SNO table="S" name="SNO">S3</SNO>
-		<CITY table="S" name="CITY">Phoenix</CITY>
-	</A_Record>
-	<A_Record>
-		<SNO table="S" name="SNO">S4</SNO>
-		<CITY table="S" name="CITY">San Diego</CITY>
-	</A_Record>
-	<A_Record>
-		<SNO table="S" name="SNO">S5</SNO>
-		<CITY table="S" name="CITY">New York</CITY>
-	</A_Record>
-</ThisQuery>
-
-You may enter any valid SQL command below. Terminate input with a semicolon.
-For a list of special commands, type help. To exit the program, type exit.
-
-$sql2xml> Select * From Faculty, S;
-
-<?xml version="1.0"?>
-<ThisQuery>
-	<A_Record>
-		<FACULTYNUMBER table="Faculty" name="FacultyNumber">1</FACULTYNUMBER>
-		<LASTNAME table="Faculty" name="LastName">Boyette</LASTNAME>
-		<FIRSTNAME table="Faculty" name="FirstName">Matthew</FIRSTNAME>
-		<ADDRESS table="Faculty" name="Address">5512 Gordon Court</ADDRESS>
-		<GENDER table="Faculty" name="Gender">Male</GENDER>
-		<BIRTHDATE table="Faculty" name="BirthDate"></BIRTHDATE>
-		<AREAOFEXPERTISE table="Faculty" name="AreaOfExpertise">European History</AREAOFEXPERTISE>
-		<SALARY table="Faculty" name="Salary">75000.00</SALARY>
-		<SNO table="S" name="SNO">S1</SNO>
-		<SNAME table="S" name="SNAME">Adams</SNAME>
-		<QUOTA table="S" name="QUOTA">3000</QUOTA>
-		<CITY table="S" name="CITY">Dallas</CITY>
-	</A_Record>
-	<A_Record>
-		<FACULTYNUMBER table="Faculty" name="FacultyNumber">2</FACULTYNUMBER>
-		<LASTNAME table="Faculty" name="LastName">Doe</LASTNAME>
-		<FIRSTNAME table="Faculty" name="FirstName">John</FIRSTNAME>
-		<ADDRESS table="Faculty" name="Address">123 Main Street</ADDRESS>
-		<GENDER table="Faculty" name="Gender">Male</GENDER>
-		<BIRTHDATE table="Faculty" name="BirthDate"></BIRTHDATE>
-		<AREAOFEXPERTISE table="Faculty" name="AreaOfExpertise">Organic Chemistry</AREAOFEXPERTISE>
-		<SALARY table="Faculty" name="Salary">90000.25</SALARY>
-		<SNO table="S" name="SNO">S1</SNO>
-		<SNAME table="S" name="SNAME">Adams</SNAME>
-		<QUOTA table="S" name="QUOTA">3000</QUOTA>
-		<CITY table="S" name="CITY">Dallas</CITY>
-	</A_Record>
-	<A_Record>
-		<FACULTYNUMBER table="Faculty" name="FacultyNumber">3</FACULTYNUMBER>
-		<LASTNAME table="Faculty" name="LastName">Smith</LASTNAME>
-		<FIRSTNAME table="Faculty" name="FirstName">Jane</FIRSTNAME>
-		<ADDRESS table="Faculty" name="Address">321 Wilshire Avenue</ADDRESS>
-		<GENDER table="Faculty" name="Gender">Female</GENDER>
-		<BIRTHDATE table="Faculty" name="BirthDate"></BIRTHDATE>
-		<AREAOFEXPERTISE table="Faculty" name="AreaOfExpertise">Computer Science</AREAOFEXPERTISE>
-		<SALARY table="Faculty" name="Salary">80000.50</SALARY>
-		<SNO table="S" name="SNO">S1</SNO>
-		<SNAME table="S" name="SNAME">Adams</SNAME>
-		<QUOTA table="S" name="QUOTA">3000</QUOTA>
-		<CITY table="S" name="CITY">Dallas</CITY>
-	</A_Record>
-	<A_Record>
-		<FACULTYNUMBER table="Faculty" name="FacultyNumber">4</FACULTYNUMBER>
-		<LASTNAME table="Faculty" name="LastName">Dobbs</LASTNAME>
-		<FIRSTNAME table="Faculty" name="FirstName">Karen</FIRSTNAME>
-		<ADDRESS table="Faculty" name="Address">567 Park Road</ADDRESS>
-		<GENDER table="Faculty" name="Gender">Female</GENDER>
-		<BIRTHDATE table="Faculty" name="BirthDate"></BIRTHDATE>
-		<AREAOFEXPERTISE table="Faculty" name="AreaOfExpertise">Information Technology</AREAOFEXPERTISE>
-		<SALARY table="Faculty" name="Salary">85000.75</SALARY>
-		<SNO table="S" name="SNO">S1</SNO>
-		<SNAME table="S" name="SNAME">Adams</SNAME>
-		<QUOTA table="S" name="QUOTA">3000</QUOTA>
-		<CITY table="S" name="CITY">Dallas</CITY>
-	</A_Record>
-	<A_Record>
-		<FACULTYNUMBER table="Faculty" name="FacultyNumber">5</FACULTYNUMBER>
-		<LASTNAME table="Faculty" name="LastName">Davis</LASTNAME>
-		<FIRSTNAME table="Faculty" name="FirstName">Mike</FIRSTNAME>
-		<ADDRESS table="Faculty" name="Address">987 College Drive</ADDRESS>
-		<GENDER table="Faculty" name="Gender">Male</GENDER>
-		<BIRTHDATE table="Faculty" name="BirthDate"></BIRTHDATE>
-		<AREAOFEXPERTISE table="Faculty" name="AreaOfExpertise">Particle Physics</AREAOFEXPERTISE>
-		<SALARY table="Faculty" name="Salary">90500.15</SALARY>
-		<SNO table="S" name="SNO">S1</SNO>
-		<SNAME table="S" name="SNAME">Adams</SNAME>
-		<QUOTA table="S" name="QUOTA">3000</QUOTA>
-		<CITY table="S" name="CITY">Dallas</CITY>
-	</A_Record>
-	<A_Record>
-		<FACULTYNUMBER table="Faculty" name="FacultyNumber">1</FACULTYNUMBER>
-		<LASTNAME table="Faculty" name="LastName">Boyette</LASTNAME>
-		<FIRSTNAME table="Faculty" name="FirstName">Matthew</FIRSTNAME>
-		<ADDRESS table="Faculty" name="Address">5512 Gordon Court</ADDRESS>
-		<GENDER table="Faculty" name="Gender">Male</GENDER>
-		<BIRTHDATE table="Faculty" name="BirthDate"></BIRTHDATE>
-		<AREAOFEXPERTISE table="Faculty" name="AreaOfExpertise">European History</AREAOFEXPERTISE>
-		<SALARY table="Faculty" name="Salary">75000.00</SALARY>
-		<SNO table="S" name="SNO">S2</SNO>
-		<SNAME table="S" name="SNAME">Smith</SNAME>
-		<QUOTA table="S" name="QUOTA">10000</QUOTA>
-		<CITY table="S" name="CITY">Chicago</CITY>
-	</A_Record>
-	<A_Record>
-		<FACULTYNUMBER table="Faculty" name="FacultyNumber">2</FACULTYNUMBER>
-		<LASTNAME table="Faculty" name="LastName">Doe</LASTNAME>
-		<FIRSTNAME table="Faculty" name="FirstName">John</FIRSTNAME>
-		<ADDRESS table="Faculty" name="Address">123 Main Street</ADDRESS>
-		<GENDER table="Faculty" name="Gender">Male</GENDER>
-		<BIRTHDATE table="Faculty" name="BirthDate"></BIRTHDATE>
-		<AREAOFEXPERTISE table="Faculty" name="AreaOfExpertise">Organic Chemistry</AREAOFEXPERTISE>
-		<SALARY table="Faculty" name="Salary">90000.25</SALARY>
-		<SNO table="S" name="SNO">S2</SNO>
-		<SNAME table="S" name="SNAME">Smith</SNAME>
-		<QUOTA table="S" name="QUOTA">10000</QUOTA>
-		<CITY table="S" name="CITY">Chicago</CITY>
-	</A_Record>
-	<A_Record>
-		<FACULTYNUMBER table="Faculty" name="FacultyNumber">3</FACULTYNUMBER>
-		<LASTNAME table="Faculty" name="LastName">Smith</LASTNAME>
-		<FIRSTNAME table="Faculty" name="FirstName">Jane</FIRSTNAME>
-		<ADDRESS table="Faculty" name="Address">321 Wilshire Avenue</ADDRESS>
-		<GENDER table="Faculty" name="Gender">Female</GENDER>
-		<BIRTHDATE table="Faculty" name="BirthDate"></BIRTHDATE>
-		<AREAOFEXPERTISE table="Faculty" name="AreaOfExpertise">Computer Science</AREAOFEXPERTISE>
-		<SALARY table="Faculty" name="Salary">80000.50</SALARY>
-		<SNO table="S" name="SNO">S2</SNO>
-		<SNAME table="S" name="SNAME">Smith</SNAME>
-		<QUOTA table="S" name="QUOTA">10000</QUOTA>
-		<CITY table="S" name="CITY">Chicago</CITY>
-	</A_Record>
-	<A_Record>
-		<FACULTYNUMBER table="Faculty" name="FacultyNumber">4</FACULTYNUMBER>
-		<LASTNAME table="Faculty" name="LastName">Dobbs</LASTNAME>
-		<FIRSTNAME table="Faculty" name="FirstName">Karen</FIRSTNAME>
-		<ADDRESS table="Faculty" name="Address">567 Park Road</ADDRESS>
-		<GENDER table="Faculty" name="Gender">Female</GENDER>
-		<BIRTHDATE table="Faculty" name="BirthDate"></BIRTHDATE>
-		<AREAOFEXPERTISE table="Faculty" name="AreaOfExpertise">Information Technology</AREAOFEXPERTISE>
-		<SALARY table="Faculty" name="Salary">85000.75</SALARY>
-		<SNO table="S" name="SNO">S2</SNO>
-		<SNAME table="S" name="SNAME">Smith</SNAME>
-		<QUOTA table="S" name="QUOTA">10000</QUOTA>
-		<CITY table="S" name="CITY">Chicago</CITY>
-	</A_Record>
-	<A_Record>
-		<FACULTYNUMBER table="Faculty" name="FacultyNumber">5</FACULTYNUMBER>
-		<LASTNAME table="Faculty" name="LastName">Davis</LASTNAME>
-		<FIRSTNAME table="Faculty" name="FirstName">Mike</FIRSTNAME>
-		<ADDRESS table="Faculty" name="Address">987 College Drive</ADDRESS>
-		<GENDER table="Faculty" name="Gender">Male</GENDER>
-		<BIRTHDATE table="Faculty" name="BirthDate"></BIRTHDATE>
-		<AREAOFEXPERTISE table="Faculty" name="AreaOfExpertise">Particle Physics</AREAOFEXPERTISE>
-		<SALARY table="Faculty" name="Salary">90500.15</SALARY>
-		<SNO table="S" name="SNO">S2</SNO>
-		<SNAME table="S" name="SNAME">Smith</SNAME>
-		<QUOTA table="S" name="QUOTA">10000</QUOTA>
-		<CITY table="S" name="CITY">Chicago</CITY>
-	</A_Record>
-	<A_Record>
-		<FACULTYNUMBER table="Faculty" name="FacultyNumber">1</FACULTYNUMBER>
-		<LASTNAME table="Faculty" name="LastName">Boyette</LASTNAME>
-		<FIRSTNAME table="Faculty" name="FirstName">Matthew</FIRSTNAME>
-		<ADDRESS table="Faculty" name="Address">5512 Gordon Court</ADDRESS>
-		<GENDER table="Faculty" name="Gender">Male</GENDER>
-		<BIRTHDATE table="Faculty" name="BirthDate"></BIRTHDATE>
-		<AREAOFEXPERTISE table="Faculty" name="AreaOfExpertise">European History</AREAOFEXPERTISE>
-		<SALARY table="Faculty" name="Salary">75000.00</SALARY>
-		<SNO table="S" name="SNO">S3</SNO>
-		<SNAME table="S" name="SNAME">Jones</SNAME>
-		<QUOTA table="S" name="QUOTA">7500</QUOTA>
-		<CITY table="S" name="CITY">Phoenix</CITY>
-	</A_Record>
-	<A_Record>
-		<FACULTYNUMBER table="Faculty" name="FacultyNumber">2</FACULTYNUMBER>
-		<LASTNAME table="Faculty" name="LastName">Doe</LASTNAME>
-		<FIRSTNAME table="Faculty" name="FirstName">John</FIRSTNAME>
-		<ADDRESS table="Faculty" name="Address">123 Main Street</ADDRESS>
-		<GENDER table="Faculty" name="Gender">Male</GENDER>
-		<BIRTHDATE table="Faculty" name="BirthDate"></BIRTHDATE>
-		<AREAOFEXPERTISE table="Faculty" name="AreaOfExpertise">Organic Chemistry</AREAOFEXPERTISE>
-		<SALARY table="Faculty" name="Salary">90000.25</SALARY>
-		<SNO table="S" name="SNO">S3</SNO>
-		<SNAME table="S" name="SNAME">Jones</SNAME>
-		<QUOTA table="S" name="QUOTA">7500</QUOTA>
-		<CITY table="S" name="CITY">Phoenix</CITY>
-	</A_Record>
-	<A_Record>
-		<FACULTYNUMBER table="Faculty" name="FacultyNumber">3</FACULTYNUMBER>
-		<LASTNAME table="Faculty" name="LastName">Smith</LASTNAME>
-		<FIRSTNAME table="Faculty" name="FirstName">Jane</FIRSTNAME>
-		<ADDRESS table="Faculty" name="Address">321 Wilshire Avenue</ADDRESS>
-		<GENDER table="Faculty" name="Gender">Female</GENDER>
-		<BIRTHDATE table="Faculty" name="BirthDate"></BIRTHDATE>
-		<AREAOFEXPERTISE table="Faculty" name="AreaOfExpertise">Computer Science</AREAOFEXPERTISE>
-		<SALARY table="Faculty" name="Salary">80000.50</SALARY>
-		<SNO table="S" name="SNO">S3</SNO>
-		<SNAME table="S" name="SNAME">Jones</SNAME>
-		<QUOTA table="S" name="QUOTA">7500</QUOTA>
-		<CITY table="S" name="CITY">Phoenix</CITY>
-	</A_Record>
-	<A_Record>
-		<FACULTYNUMBER table="Faculty" name="FacultyNumber">4</FACULTYNUMBER>
-		<LASTNAME table="Faculty" name="LastName">Dobbs</LASTNAME>
-		<FIRSTNAME table="Faculty" name="FirstName">Karen</FIRSTNAME>
-		<ADDRESS table="Faculty" name="Address">567 Park Road</ADDRESS>
-		<GENDER table="Faculty" name="Gender">Female</GENDER>
-		<BIRTHDATE table="Faculty" name="BirthDate"></BIRTHDATE>
-		<AREAOFEXPERTISE table="Faculty" name="AreaOfExpertise">Information Technology</AREAOFEXPERTISE>
-		<SALARY table="Faculty" name="Salary">85000.75</SALARY>
-		<SNO table="S" name="SNO">S3</SNO>
-		<SNAME table="S" name="SNAME">Jones</SNAME>
-		<QUOTA table="S" name="QUOTA">7500</QUOTA>
-		<CITY table="S" name="CITY">Phoenix</CITY>
-	</A_Record>
-	<A_Record>
-		<FACULTYNUMBER table="Faculty" name="FacultyNumber">5</FACULTYNUMBER>
-		<LASTNAME table="Faculty" name="LastName">Davis</LASTNAME>
-		<FIRSTNAME table="Faculty" name="FirstName">Mike</FIRSTNAME>
-		<ADDRESS table="Faculty" name="Address">987 College Drive</ADDRESS>
-		<GENDER table="Faculty" name="Gender">Male</GENDER>
-		<BIRTHDATE table="Faculty" name="BirthDate"></BIRTHDATE>
-		<AREAOFEXPERTISE table="Faculty" name="AreaOfExpertise">Particle Physics</AREAOFEXPERTISE>
-		<SALARY table="Faculty" name="Salary">90500.15</SALARY>
-		<SNO table="S" name="SNO">S3</SNO>
-		<SNAME table="S" name="SNAME">Jones</SNAME>
-		<QUOTA table="S" name="QUOTA">7500</QUOTA>
-		<CITY table="S" name="CITY">Phoenix</CITY>
-	</A_Record>
-	<A_Record>
-		<FACULTYNUMBER table="Faculty" name="FacultyNumber">1</FACULTYNUMBER>
-		<LASTNAME table="Faculty" name="LastName">Boyette</LASTNAME>
-		<FIRSTNAME table="Faculty" name="FirstName">Matthew</FIRSTNAME>
-		<ADDRESS table="Faculty" name="Address">5512 Gordon Court</ADDRESS>
-		<GENDER table="Faculty" name="Gender">Male</GENDER>
-		<BIRTHDATE table="Faculty" name="BirthDate"></BIRTHDATE>
-		<AREAOFEXPERTISE table="Faculty" name="AreaOfExpertise">European History</AREAOFEXPERTISE>
-		<SALARY table="Faculty" name="Salary">75000.00</SALARY>
-		<SNO table="S" name="SNO">S4</SNO>
-		<SNAME table="S" name="SNAME">Knapp</SNAME>
-		<QUOTA table="S" name="QUOTA">13000</QUOTA>
-		<CITY table="S" name="CITY">San Diego</CITY>
-	</A_Record>
-	<A_Record>
-		<FACULTYNUMBER table="Faculty" name="FacultyNumber">2</FACULTYNUMBER>
-		<LASTNAME table="Faculty" name="LastName">Doe</LASTNAME>
-		<FIRSTNAME table="Faculty" name="FirstName">John</FIRSTNAME>
-		<ADDRESS table="Faculty" name="Address">123 Main Street</ADDRESS>
-		<GENDER table="Faculty" name="Gender">Male</GENDER>
-		<BIRTHDATE table="Faculty" name="BirthDate"></BIRTHDATE>
-		<AREAOFEXPERTISE table="Faculty" name="AreaOfExpertise">Organic Chemistry</AREAOFEXPERTISE>
-		<SALARY table="Faculty" name="Salary">90000.25</SALARY>
-		<SNO table="S" name="SNO">S4</SNO>
-		<SNAME table="S" name="SNAME">Knapp</SNAME>
-		<QUOTA table="S" name="QUOTA">13000</QUOTA>
-		<CITY table="S" name="CITY">San Diego</CITY>
-	</A_Record>
-	<A_Record>
-		<FACULTYNUMBER table="Faculty" name="FacultyNumber">3</FACULTYNUMBER>
-		<LASTNAME table="Faculty" name="LastName">Smith</LASTNAME>
-		<FIRSTNAME table="Faculty" name="FirstName">Jane</FIRSTNAME>
-		<ADDRESS table="Faculty" name="Address">321 Wilshire Avenue</ADDRESS>
-		<GENDER table="Faculty" name="Gender">Female</GENDER>
-		<BIRTHDATE table="Faculty" name="BirthDate"></BIRTHDATE>
-		<AREAOFEXPERTISE table="Faculty" name="AreaOfExpertise">Computer Science</AREAOFEXPERTISE>
-		<SALARY table="Faculty" name="Salary">80000.50</SALARY>
-		<SNO table="S" name="SNO">S4</SNO>
-		<SNAME table="S" name="SNAME">Knapp</SNAME>
-		<QUOTA table="S" name="QUOTA">13000</QUOTA>
-		<CITY table="S" name="CITY">San Diego</CITY>
-	</A_Record>
-	<A_Record>
-		<FACULTYNUMBER table="Faculty" name="FacultyNumber">4</FACULTYNUMBER>
-		<LASTNAME table="Faculty" name="LastName">Dobbs</LASTNAME>
-		<FIRSTNAME table="Faculty" name="FirstName">Karen</FIRSTNAME>
-		<ADDRESS table="Faculty" name="Address">567 Park Road</ADDRESS>
-		<GENDER table="Faculty" name="Gender">Female</GENDER>
-		<BIRTHDATE table="Faculty" name="BirthDate"></BIRTHDATE>
-		<AREAOFEXPERTISE table="Faculty" name="AreaOfExpertise">Information Technology</AREAOFEXPERTISE>
-		<SALARY table="Faculty" name="Salary">85000.75</SALARY>
-		<SNO table="S" name="SNO">S4</SNO>
-		<SNAME table="S" name="SNAME">Knapp</SNAME>
-		<QUOTA table="S" name="QUOTA">13000</QUOTA>
-		<CITY table="S" name="CITY">San Diego</CITY>
-	</A_Record>
-	<A_Record>
-		<FACULTYNUMBER table="Faculty" name="FacultyNumber">5</FACULTYNUMBER>
-		<LASTNAME table="Faculty" name="LastName">Davis</LASTNAME>
-		<FIRSTNAME table="Faculty" name="FirstName">Mike</FIRSTNAME>
-		<ADDRESS table="Faculty" name="Address">987 College Drive</ADDRESS>
-		<GENDER table="Faculty" name="Gender">Male</GENDER>
-		<BIRTHDATE table="Faculty" name="BirthDate"></BIRTHDATE>
-		<AREAOFEXPERTISE table="Faculty" name="AreaOfExpertise">Particle Physics</AREAOFEXPERTISE>
-		<SALARY table="Faculty" name="Salary">90500.15</SALARY>
-		<SNO table="S" name="SNO">S4</SNO>
-		<SNAME table="S" name="SNAME">Knapp</SNAME>
-		<QUOTA table="S" name="QUOTA">13000</QUOTA>
-		<CITY table="S" name="CITY">San Diego</CITY>
-	</A_Record>
-	<A_Record>
-		<FACULTYNUMBER table="Faculty" name="FacultyNumber">1</FACULTYNUMBER>
-		<LASTNAME table="Faculty" name="LastName">Boyette</LASTNAME>
-		<FIRSTNAME table="Faculty" name="FirstName">Matthew</FIRSTNAME>
-		<ADDRESS table="Faculty" name="Address">5512 Gordon Court</ADDRESS>
-		<GENDER table="Faculty" name="Gender">Male</GENDER>
-		<BIRTHDATE table="Faculty" name="BirthDate"></BIRTHDATE>
-		<AREAOFEXPERTISE table="Faculty" name="AreaOfExpertise">European History</AREAOFEXPERTISE>
-		<SALARY table="Faculty" name="Salary">75000.00</SALARY>
-		<SNO table="S" name="SNO">S5</SNO>
-		<SNAME table="S" name="SNAME">Martin</SNAME>
-		<QUOTA table="S" name="QUOTA">25000</QUOTA>
-		<CITY table="S" name="CITY">New York</CITY>
-	</A_Record>
-	<A_Record>
-		<FACULTYNUMBER table="Faculty" name="FacultyNumber">2</FACULTYNUMBER>
-		<LASTNAME table="Faculty" name="LastName">Doe</LASTNAME>
-		<FIRSTNAME table="Faculty" name="FirstName">John</FIRSTNAME>
-		<ADDRESS table="Faculty" name="Address">123 Main Street</ADDRESS>
-		<GENDER table="Faculty" name="Gender">Male</GENDER>
-		<BIRTHDATE table="Faculty" name="BirthDate"></BIRTHDATE>
-		<AREAOFEXPERTISE table="Faculty" name="AreaOfExpertise">Organic Chemistry</AREAOFEXPERTISE>
-		<SALARY table="Faculty" name="Salary">90000.25</SALARY>
-		<SNO table="S" name="SNO">S5</SNO>
-		<SNAME table="S" name="SNAME">Martin</SNAME>
-		<QUOTA table="S" name="QUOTA">25000</QUOTA>
-		<CITY table="S" name="CITY">New York</CITY>
-	</A_Record>
-	<A_Record>
-		<FACULTYNUMBER table="Faculty" name="FacultyNumber">3</FACULTYNUMBER>
-		<LASTNAME table="Faculty" name="LastName">Smith</LASTNAME>
-		<FIRSTNAME table="Faculty" name="FirstName">Jane</FIRSTNAME>
-		<ADDRESS table="Faculty" name="Address">321 Wilshire Avenue</ADDRESS>
-		<GENDER table="Faculty" name="Gender">Female</GENDER>
-		<BIRTHDATE table="Faculty" name="BirthDate"></BIRTHDATE>
-		<AREAOFEXPERTISE table="Faculty" name="AreaOfExpertise">Computer Science</AREAOFEXPERTISE>
-		<SALARY table="Faculty" name="Salary">80000.50</SALARY>
-		<SNO table="S" name="SNO">S5</SNO>
-		<SNAME table="S" name="SNAME">Martin</SNAME>
-		<QUOTA table="S" name="QUOTA">25000</QUOTA>
-		<CITY table="S" name="CITY">New York</CITY>
-	</A_Record>
-	<A_Record>
-		<FACULTYNUMBER table="Faculty" name="FacultyNumber">4</FACULTYNUMBER>
-		<LASTNAME table="Faculty" name="LastName">Dobbs</LASTNAME>
-		<FIRSTNAME table="Faculty" name="FirstName">Karen</FIRSTNAME>
-		<ADDRESS table="Faculty" name="Address">567 Park Road</ADDRESS>
-		<GENDER table="Faculty" name="Gender">Female</GENDER>
-		<BIRTHDATE table="Faculty" name="BirthDate"></BIRTHDATE>
-		<AREAOFEXPERTISE table="Faculty" name="AreaOfExpertise">Information Technology</AREAOFEXPERTISE>
-		<SALARY table="Faculty" name="Salary">85000.75</SALARY>
-		<SNO table="S" name="SNO">S5</SNO>
-		<SNAME table="S" name="SNAME">Martin</SNAME>
-		<QUOTA table="S" name="QUOTA">25000</QUOTA>
-		<CITY table="S" name="CITY">New York</CITY>
-	</A_Record>
-	<A_Record>
-		<FACULTYNUMBER table="Faculty" name="FacultyNumber">5</FACULTYNUMBER>
-		<LASTNAME table="Faculty" name="LastName">Davis</LASTNAME>
-		<FIRSTNAME table="Faculty" name="FirstName">Mike</FIRSTNAME>
-		<ADDRESS table="Faculty" name="Address">987 College Drive</ADDRESS>
-		<GENDER table="Faculty" name="Gender">Male</GENDER>
-		<BIRTHDATE table="Faculty" name="BirthDate"></BIRTHDATE>
-		<AREAOFEXPERTISE table="Faculty" name="AreaOfExpertise">Particle Physics</AREAOFEXPERTISE>
-		<SALARY table="Faculty" name="Salary">90500.15</SALARY>
-		<SNO table="S" name="SNO">S5</SNO>
-		<SNAME table="S" name="SNAME">Martin</SNAME>
-		<QUOTA table="S" name="QUOTA">25000</QUOTA>
-		<CITY table="S" name="CITY">New York</CITY>
-	</A_Record>
-</ThisQuery>
-
-You may enter any valid SQL command below. Terminate input with a semicolon.
-For a list of special commands, type help. To exit the program, type exit.
-
-$sql2xml> Select FacultyNumber From Faculty;
+$sql2xml> SELECT FacultyNumber FROM Faculty;
 
 <?xml version="1.0"?>
 <ThisQuery>
@@ -441,7 +78,7 @@ $sql2xml> Select FacultyNumber From Faculty;
 You may enter any valid SQL command below. Terminate input with a semicolon.
 For a list of special commands, type help. To exit the program, type exit.
 
-$sql2xml> Select FacultyNumber As FacNum From Faculty;
+$sql2xml> SELECT FacultyNumber AS FacNum FROM Faculty;
 
 <?xml version="1.0"?>
 <ThisQuery>
@@ -465,7 +102,7 @@ $sql2xml> Select FacultyNumber As FacNum From Faculty;
 You may enter any valid SQL command below. Terminate input with a semicolon.
 For a list of special commands, type help. To exit the program, type exit.
 
-$sql2xml> Select Faculty.FacultyNumber As FacNum From Faculty;
+$sql2xml> SELECT Faculty.FacultyNumber AS FacNum FROM Faculty;
 
 <?xml version="1.0"?>
 <ThisQuery>
@@ -485,3 +122,67 @@ $sql2xml> Select Faculty.FacultyNumber As FacNum From Faculty;
 		<FACNUM table="Faculty" name="FacultyNumber">5</FACNUM>
 	</A_Record>
 </ThisQuery>
+
+You may enter any valid SQL command below. Terminate input with a semicolon.
+For a list of special commands, type help. To exit the program, type exit.
+
+$sql2xml> SELECT * FROM Faculty;
+
+<?xml version="1.0"?>
+<ThisQuery>
+	<A_Record>
+		<FACULTYNUMBER table="Faculty" name="FacultyNumber">1</FACULTYNUMBER>
+		<LASTNAME table="Faculty" name="LastName">Boyette</LASTNAME>
+		<FIRSTNAME table="Faculty" name="FirstName">Matthew</FIRSTNAME>
+		<ADDRESS table="Faculty" name="Address">5512 Gordon Court</ADDRESS>
+		<GENDER table="Faculty" name="Gender">Male</GENDER>
+		<BIRTHDATE table="Faculty" name="BirthDate"></BIRTHDATE>
+		<AREAOFEXPERTISE table="Faculty" name="AreaOfExpertise">European History</AREAOFEXPERTISE>
+		<SALARY table="Faculty" name="Salary">75000.00</SALARY>
+	</A_Record>
+	<A_Record>
+		<FACULTYNUMBER table="Faculty" name="FacultyNumber">2</FACULTYNUMBER>
+		<LASTNAME table="Faculty" name="LastName">Doe</LASTNAME>
+		<FIRSTNAME table="Faculty" name="FirstName">John</FIRSTNAME>
+		<ADDRESS table="Faculty" name="Address">123 Main Street</ADDRESS>
+		<GENDER table="Faculty" name="Gender">Male</GENDER>
+		<BIRTHDATE table="Faculty" name="BirthDate"></BIRTHDATE>
+		<AREAOFEXPERTISE table="Faculty" name="AreaOfExpertise">Organic Chemistry</AREAOFEXPERTISE>
+		<SALARY table="Faculty" name="Salary">90000.25</SALARY>
+	</A_Record>
+	<A_Record>
+		<FACULTYNUMBER table="Faculty" name="FacultyNumber">3</FACULTYNUMBER>
+		<LASTNAME table="Faculty" name="LastName">Smith</LASTNAME>
+		<FIRSTNAME table="Faculty" name="FirstName">Jane</FIRSTNAME>
+		<ADDRESS table="Faculty" name="Address">321 Wilshire Avenue</ADDRESS>
+		<GENDER table="Faculty" name="Gender">Female</GENDER>
+		<BIRTHDATE table="Faculty" name="BirthDate"></BIRTHDATE>
+		<AREAOFEXPERTISE table="Faculty" name="AreaOfExpertise">Computer Science</AREAOFEXPERTISE>
+		<SALARY table="Faculty" name="Salary">80000.50</SALARY>
+	</A_Record>
+	<A_Record>
+		<FACULTYNUMBER table="Faculty" name="FacultyNumber">4</FACULTYNUMBER>
+		<LASTNAME table="Faculty" name="LastName">Dobbs</LASTNAME>
+		<FIRSTNAME table="Faculty" name="FirstName">Karen</FIRSTNAME>
+		<ADDRESS table="Faculty" name="Address">567 Park Road</ADDRESS>
+		<GENDER table="Faculty" name="Gender">Female</GENDER>
+		<BIRTHDATE table="Faculty" name="BirthDate"></BIRTHDATE>
+		<AREAOFEXPERTISE table="Faculty" name="AreaOfExpertise">Information Technology</AREAOFEXPERTISE>
+		<SALARY table="Faculty" name="Salary">85000.75</SALARY>
+	</A_Record>
+	<A_Record>
+		<FACULTYNUMBER table="Faculty" name="FacultyNumber">5</FACULTYNUMBER>
+		<LASTNAME table="Faculty" name="LastName">Davis</LASTNAME>
+		<FIRSTNAME table="Faculty" name="FirstName">Mike</FIRSTNAME>
+		<ADDRESS table="Faculty" name="Address">987 College Drive</ADDRESS>
+		<GENDER table="Faculty" name="Gender">Male</GENDER>
+		<BIRTHDATE table="Faculty" name="BirthDate"></BIRTHDATE>
+		<AREAOFEXPERTISE table="Faculty" name="AreaOfExpertise">Particle Physics</AREAOFEXPERTISE>
+		<SALARY table="Faculty" name="Salary">90500.15</SALARY>
+	</A_Record>
+</ThisQuery>
+
+You may enter any valid SQL command below. Terminate input with a semicolon.
+For a list of special commands, type help. To exit the program, type exit.
+
+$sql2xml> exit;

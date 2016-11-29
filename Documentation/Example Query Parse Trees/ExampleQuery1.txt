@@ -1,1 +1,1 @@
-Select S.SNO, S.CITY From S
+SELECT S.SNO, S.CITY FROM S

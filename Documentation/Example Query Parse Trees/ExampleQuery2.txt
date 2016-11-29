@@ -1,0 +1,1 @@
+SELECT Faculty.FacultyNumber AS FacNum FROM Faculty
